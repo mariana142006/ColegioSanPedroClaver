@@ -1,0 +1,99 @@
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+}
+
+
+.layout{
+
+    display:flex;
+    min-height:100vh;
+
+}
+
+
+.sidebar{
+
+    width:250px;
+    background:#003b73;
+    color:white;
+    padding:20px;
+
+}
+
+
+.logo{
+
+    color:white;
+    text-align:center;
+
+}
+
+
+
+.sidebar a{
+
+    display:block;
+    color:white;
+    text-decoration:none;
+    padding:12px;
+    margin-top:5px;
+
+}
+
+
+
+.sidebar a:hover{
+
+    background:#f58220;
+    border-radius:8px;
+
+}
+
+
+
+.sidebar i{
+
+    margin-right:10px;
+
+}
+
+
+
+.contenido{
+
+    flex:1;
+    background:#f4f6f9;
+
+}
+
+
+
+.header{
+
+    background:white;
+    padding:20px;
+    display:flex;
+    justify-content:space-between;
+    box-shadow:0 2px 5px #ccc;
+
+}
+
+
+
+main{
+
+    padding:30px;
+
+}
+
+
+
+.tarjeta{
+
+    padding:25px;
+    text-align:center;
+    border:none;
+    border-radius:15px;
+
+}

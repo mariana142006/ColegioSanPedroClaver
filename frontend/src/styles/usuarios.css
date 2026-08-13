@@ -1,0 +1,102 @@
+.usuarios-container {
+  width: 100%;
+  padding: 10px;
+}
+
+.usuario-header {
+  display: flex;
+  flex-direction: column; /* Alinea el contenido verticalmente */
+  align-items: flex-start; /* Todo alineado hacia la izquierda */
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.usuario-header h2 {
+  color: #0b2d5c;
+  margin-bottom: 5px;
+}
+
+.btn-naranja {
+  background: #fd7e14;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.btn-naranja:hover {
+  background: #dc6505;
+  color: white;
+}
+
+.card {
+  border-radius: 15px;
+}
+
+.tabla-usuarios-container {
+  width: 100%;
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.table {
+  width: 100%;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table thead th {
+  background: #0b2d5c;
+  color: white;
+  border: none;
+  padding: 12px;
+}
+
+.table tbody tr:hover {
+  background: #f5f7fa;
+}
+
+.modal-content {
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0,0,0,.2);
+}
+
+.modal-header {
+  background: #0b2d5c;
+  color: white;
+  border-radius: 20px 20px 0 0;
+}
+
+.form-control {
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.btn-primary {
+  background: #0d6efd;
+  border: none;
+  border-radius: 10px;
+}
+
+.btn-secondary {
+  border-radius: 10px;
+}
+
+.btn-azul{
+    background-color:#0b2d5c;
+    color:white;
+    border:none;
+}
+
+.btn-azul:hover{
+    background-color:#0b2d5c;
+}
