@@ -199,7 +199,7 @@ function Llegadas() {
   };
 
   const obtenerAlertas = () => {
-    const alertas = llegadas.filter((item) => item.total_llegadas >= 3);
+    const alertas = llegadas.filter((item) => item.total_mes >= 3);
 
     const estudiantesUnicos = [];
 
@@ -326,7 +326,7 @@ function Llegadas() {
               <br />
               Total llegadas:
               <span className="badge bg-danger ms-2">
-                {item.total_llegadas}
+                {item.total_mes}
               </span>
               <br />
               <button
@@ -560,7 +560,7 @@ function Llegadas() {
         <CartaReporte
           tipo="llegada"
           estudiante={estudianteCarta}
-          total={estudianteCarta?.total_llegadas}
+          total={estudianteCarta?.total_mes}
           onCerrar={() => setMostrarCarta(false)}
           onGenerarPDF={() => {}}
         />
