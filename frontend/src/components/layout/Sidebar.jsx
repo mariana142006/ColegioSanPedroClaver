@@ -88,13 +88,6 @@ function Sidebar() {
     },
 
     {
-      nombre: "Cartas generadas",
-      ruta: "/cartas",
-      icono: <FaFileAlt />,
-      roles: ["Administrador", "Coordinador", "Director"],
-    },
-
-    {
       nombre: "Configuración",
       ruta: "/configuracion",
       icono: <FaCog />,
@@ -215,3 +208,4 @@ function Sidebar() {
 }
 
 export default Sidebar;
+
