@@ -12,7 +12,7 @@ import Inasistencias from "./pages/Inasistencias";
 import Reportes from "./pages/Reportes";
 import Configuracion from "./pages/Configuracion";
 import Directores from "./pages/Directores";
-import Cartas from "./pages/cartas";
+import Cartas from "./pages/Cartas";
 import Login from "./pages/Login";
 
 import ProtectedRoute from "./components/ProtectedRoute";
