@@ -112,7 +112,7 @@ function Configuracion() {
           {formulario.logo && (
             <div className="text-center mb-3">
               <img
-                src={`/src/assets/${formulario.logo}`}
+                src="/logo-colegio.png"
                 alt="Logo colegio"
                 style={{
                   width: "100px",

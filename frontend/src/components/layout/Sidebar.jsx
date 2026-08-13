@@ -150,7 +150,7 @@ function Sidebar() {
           }}
         >
           <img
-            src="/public/logo-colegio.png"
+            src="/logo-colegio.png"
             alt="Logo Colegio San Pedro Claver"
             style={{
               width: "100%",
