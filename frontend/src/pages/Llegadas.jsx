@@ -86,8 +86,8 @@ function Llegadas() {
 
     if (formulario.hora < horaMinima) {
       Swal.fire({
-        title: "Hora no válida",
-        text: "Las llegadas tarde solo se registran desde las 06:20 a.m.",
+        title: "Hora no vÃ¡lida",
+        text: `Las llegadas tarde solo se registran desde las ${horaMinima}.`,
         icon: "warning",
         confirmButtonText: "Aceptar",
       });
@@ -149,15 +149,15 @@ function Llegadas() {
 
   const eliminarLlegada = async (id) => {
     const resultado = await Swal.fire({
-      title: "¿Eliminar registro?",
+      title: "Â¿Eliminar registro?",
 
-      text: "Esta acción no se puede deshacer",
+      text: "Esta acciÃ³n no se puede deshacer",
 
       icon: "warning",
 
       showCancelButton: true,
 
-      confirmButtonText: "Sí, eliminar",
+      confirmButtonText: "SÃ­, eliminar",
 
       cancelButtonText: "Cancelar",
     });
@@ -188,6 +188,7 @@ function Llegadas() {
   };
 
   const consultarLlegadasEstudiante = async (id_estudiante) => {
+    setTotalLlegadas(0);
     try {
       const respuesta = await api.get(`/llegadas/estudiante/${id_estudiante}`);
 
@@ -290,7 +291,7 @@ function Llegadas() {
                   <textarea
                     className="form-control"
                     name="observacion"
-                    placeholder="Observación"
+                    placeholder="ObservaciÃ³n"
                     value={formulario.observacion}
                     onChange={manejarCambio}
                   />
@@ -315,7 +316,7 @@ function Llegadas() {
 
       {obtenerAlertas().length > 0 && (
         <div className="alert alert-danger">
-          <h5>⚠️ Alertas de llegadas tardes</h5>
+          <h5>âš ï¸ Alertas de llegadas tardes</h5>
 
           {obtenerAlertas().map((item) => (
             <div key={item.id_estudiante} className="mb-3 p-2 rounded">
@@ -350,7 +351,7 @@ function Llegadas() {
 
             <th>Hora</th>
 
-            <th>Observación</th>
+            <th>ObservaciÃ³n</th>
 
             <th>Total mes</th>
 
@@ -530,7 +531,7 @@ function Llegadas() {
                       Hora:
                       {item.hora}
                       <br />
-                      Observación:
+                      ObservaciÃ³n:
                       {item.observacion}
                     </div>
                   ))}
@@ -546,7 +547,7 @@ function Llegadas() {
                       setMostrarCarta(true);
                     }}
                   >
-                    📄 Generar carta
+                    ðŸ“„ Generar carta
                   </button>
                 </div>
               </div>

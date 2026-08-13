@@ -97,7 +97,7 @@ function Estudiantes() {
       await api.post("/estudiantes", formulario);
 
       Swal.fire({
-        title: "¡Registrado!",
+        title: "Â¡Registrado!",
         text: "El estudiante fue creado correctamente.",
         icon: "success",
         confirmButtonText: "Aceptar",
@@ -149,7 +149,7 @@ function Estudiantes() {
       );
 
       Swal.fire({
-        title: "¡Actualizado!",
+        title: "Â¡Actualizado!",
 
         text: "El estudiante fue actualizado correctamente.",
 
@@ -174,11 +174,11 @@ function Estudiantes() {
 
   const eliminarEstudiante = async (id) => {
     const resultado = await Swal.fire({
-      title: "¿Desactivar estudiante?",
-      text: "El estudiante pasará a estado Inactivo y conservará todo su historial.",
+      title: "Â¿Desactivar estudiante?",
+      text: "El estudiante pasarÃ¡ a estado Inactivo y conservarÃ¡ todo su historial.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Sí, desactivar",
+      confirmButtonText: "SÃ­, desactivar",
       cancelButtonText: "Cancelar",
       confirmButtonColor: "#dc6505",
     });
@@ -192,7 +192,7 @@ function Estudiantes() {
 
       Swal.fire({
         title: "Estudiante desactivado",
-        text: "El estudiante ahora está Inactivo y su historial fue conservado.",
+        text: "El estudiante ahora estÃ¡ Inactivo y su historial fue conservado.",
         icon: "success",
         timer: 1800,
         showConfirmButton: false,
@@ -212,11 +212,11 @@ function Estudiantes() {
 
   const activarEstudiante = async (id) => {
     const resultado = await Swal.fire({
-      title: "¿Activar estudiante?",
-      text: "El estudiante volverá a estar disponible en el sistema.",
+      title: "Â¿Activar estudiante?",
+      text: "El estudiante volverÃ¡ a estar disponible en el sistema.",
       icon: "question",
       showCancelButton: true,
-      confirmButtonText: "Sí, activar",
+      confirmButtonText: "SÃ­, activar",
       cancelButtonText: "Cancelar",
       confirmButtonColor: "#198754",
     });
@@ -229,8 +229,8 @@ function Estudiantes() {
       await api.put(`/estudiantes/${id}/activar`);
 
       Swal.fire({
-        title: "¡Activado!",
-        text: "El estudiante volvió a estar activo.",
+        title: "Â¡Activado!",
+        text: "El estudiante volviÃ³ a estar activo.",
         icon: "success",
         timer: 1500,
         showConfirmButton: false,
@@ -294,7 +294,7 @@ function Estudiantes() {
   return (
     <div className="usuarios-container">
       <div className="usuario-header">
-        <h2 className="fw-bold">Gestión de Estudiantes</h2>
+        <h2 className="fw-bold">GestiÃ³n de Estudiantes</h2>
 
         <p className="text-muted">
           Administra los estudiantes del Colegio San Pedro Claver
@@ -389,7 +389,7 @@ function Estudiantes() {
                     <input
                       className="form-control mb-3"
                       name="telefono_acudiente"
-                      placeholder="Teléfono acudiente"
+                      placeholder="TelÃ©fono acudiente"
                       value={formulario.telefono_acudiente}
                       onChange={manejarCambio}
                     />
@@ -416,7 +416,7 @@ function Estudiantes() {
           <input
             className="form-control"
             style={{ width: "300px" }}
-            placeholder="🔍 Buscar estudiante..."
+            placeholder="ðŸ” Buscar estudiante..."
             value={busqueda}
             onChange={(e) => {setBusqueda(e.target.value); setPaginaActual(1);}}
           />
@@ -425,7 +425,7 @@ function Estudiantes() {
             className="form-control"
             style={{ width: "200px" }}
             value={filtroEstado}
-            onChange={(e) => {setFiltroEstado(e.target.value); setpaginaActual(1);}}
+            onChange={(e) => {setFiltroEstado(e.target.value); setPaginaActual(1);}}
           >
             <option value="Todos">Todos</option>
 
@@ -519,11 +519,11 @@ function Estudiantes() {
               disabled={paginaActual === 1}
               onClick={() => setPaginaActual((pagina) => pagina - 1)}
             >
-              ← Anterior
+              â† Anterior
             </button>
 
             <span className="fw-bold">
-              Página {paginaActual} de {totalPaginas || 1}
+              PÃ¡gina {paginaActual} de {totalPaginas || 1}
             </span>
 
             <button
@@ -531,7 +531,7 @@ function Estudiantes() {
               disabled={paginaActual === totalPaginas || totalPaginas === 0}
               onClick={() => setPaginaActual((pagina) => pagina + 1)}
             >
-              Siguiente →
+              Siguiente â†’
             </button>
           </div>
         </div>
