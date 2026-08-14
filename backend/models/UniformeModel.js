@@ -36,26 +36,29 @@ const obtenerUniformes = async () => {
 
 // crear reporte
 const crearUniforme = async (datos) => {
-  const { id_estudiante, fecha, motivo } = datos;
+  const { id_estudiante, fecha, hora, motivo, observacion } = datos;
 
   const [resultado] = await conexion.query(
     `
-
-        INSERT INTO uniforme
-
-        (
-
+      INSERT INTO uniforme
+      (
         id_estudiante,
         fecha,
-        motivo
-
-        )
-
-        VALUES (?,?,?)
-
-        `,
-
-    [id_estudiante, fecha, motivo],
+        hora,
+        motivo,
+        observacion,
+        genero_alerta
+      )
+      VALUES (?, ?, ?, ?, ?, ?)
+    `,
+    [
+      id_estudiante,
+      fecha,
+      hora,
+      motivo,
+      observacion || null,
+      0,
+    ],
   );
 
   return resultado;
@@ -63,7 +66,7 @@ const crearUniforme = async (datos) => {
 
 // actualizar reporte
 const actualizarUniforme = async (id, datos) => {
-  const { id_estudiante, fecha, motivo } = datos;
+  const { id_estudiante, fecha, hora, motivo } = datos;
 
   const [resultado] = await conexion.query(
     `
@@ -72,13 +75,14 @@ const actualizarUniforme = async (id, datos) => {
 
         id_estudiante=?,
         fecha=?,
+        hora=?,
         motivo=?
 
         WHERE id_uniforme=?
 
         `,
 
-    [id_estudiante, fecha, motivo, id],
+    [id_estudiante, fecha, hora, motivo, id],
   );
 
   return resultado;

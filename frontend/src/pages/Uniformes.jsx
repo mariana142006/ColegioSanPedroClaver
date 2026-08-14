@@ -226,6 +226,14 @@ function Uniformes() {
                     onChange={manejarCambio}
                   />
 
+                  <input
+                    className="form-control mb-3"
+                    type="time"
+                    name="hora"
+                    value={formulario.hora}
+                    onChange={manejarCambio}
+                  />
+
                   <select
                     className="form-control mb-3"
                     name="motivo"

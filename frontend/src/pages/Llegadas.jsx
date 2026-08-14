@@ -86,8 +86,8 @@ function Llegadas() {
 
     if (formulario.hora < horaMinima) {
       Swal.fire({
-        title: "Hora no vÃ¡lida",
-        text: `Las llegadas tarde solo se registran desde las ${horaMinima}.`,
+        title: "Hora no válida",
+        text: "Las llegadas tarde solo se registran desde las 06:20 a.m.",
         icon: "warning",
         confirmButtonText: "Aceptar",
       });
@@ -149,15 +149,15 @@ function Llegadas() {
 
   const eliminarLlegada = async (id) => {
     const resultado = await Swal.fire({
-      title: "Â¿Eliminar registro?",
+      title: "¿Eliminar registro?",
 
-      text: "Esta acciÃ³n no se puede deshacer",
+      text: "Esta acción no se puede deshacer",
 
       icon: "warning",
 
       showCancelButton: true,
 
-      confirmButtonText: "SÃ­, eliminar",
+      confirmButtonText: "Sí, eliminar",
 
       cancelButtonText: "Cancelar",
     });
@@ -188,7 +188,6 @@ function Llegadas() {
   };
 
   const consultarLlegadasEstudiante = async (id_estudiante) => {
-    setTotalLlegadas(0);
     try {
       const respuesta = await api.get(`/llegadas/estudiante/${id_estudiante}`);
 
@@ -199,7 +198,7 @@ function Llegadas() {
   };
 
   const obtenerAlertas = () => {
-    const alertas = llegadas.filter((item) => item.total_mes >= 3);
+    const alertas = llegadas.filter((item) => item.total_llegadas >= 3);
 
     const estudiantesUnicos = [];
 
@@ -291,7 +290,7 @@ function Llegadas() {
                   <textarea
                     className="form-control"
                     name="observacion"
-                    placeholder="ObservaciÃ³n"
+                    placeholder="Observación"
                     value={formulario.observacion}
                     onChange={manejarCambio}
                   />
@@ -316,7 +315,7 @@ function Llegadas() {
 
       {obtenerAlertas().length > 0 && (
         <div className="alert alert-danger">
-          <h5>âš ï¸ Alertas de llegadas tardes</h5>
+          <h5>⚠️ Alertas de llegadas tardes</h5>
 
           {obtenerAlertas().map((item) => (
             <div key={item.id_estudiante} className="mb-3 p-2 rounded">
@@ -326,7 +325,7 @@ function Llegadas() {
               <br />
               Total llegadas:
               <span className="badge bg-danger ms-2">
-                {item.total_mes}
+                {item.total_llegadas}
               </span>
               <br />
               <button
@@ -351,7 +350,7 @@ function Llegadas() {
 
             <th>Hora</th>
 
-            <th>ObservaciÃ³n</th>
+            <th>Observación</th>
 
             <th>Total mes</th>
 
@@ -531,7 +530,7 @@ function Llegadas() {
                       Hora:
                       {item.hora}
                       <br />
-                      ObservaciÃ³n:
+                      Observación:
                       {item.observacion}
                     </div>
                   ))}
@@ -547,7 +546,7 @@ function Llegadas() {
                       setMostrarCarta(true);
                     }}
                   >
-                    ðŸ“„ Generar carta
+                    📄 Generar carta
                   </button>
                 </div>
               </div>
@@ -560,7 +559,7 @@ function Llegadas() {
         <CartaReporte
           tipo="llegada"
           estudiante={estudianteCarta}
-          total={estudianteCarta?.total_mes}
+          total={estudianteCarta?.total_llegadas}
           onCerrar={() => setMostrarCarta(false)}
           onGenerarPDF={() => {}}
         />
