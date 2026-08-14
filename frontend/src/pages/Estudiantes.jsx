@@ -416,7 +416,7 @@ function Estudiantes() {
           <input
             className="form-control"
             style={{ width: "300px" }}
-            placeholder="ðŸ” Buscar estudiante..."
+            placeholder="Buscar estudiante..."
             value={busqueda}
             onChange={(e) => {setBusqueda(e.target.value); setPaginaActual(1);}}
           />
@@ -519,7 +519,7 @@ function Estudiantes() {
               disabled={paginaActual === 1}
               onClick={() => setPaginaActual((pagina) => pagina - 1)}
             >
-              â† Anterior
+              Anterior
             </button>
 
             <span className="fw-bold">
@@ -531,7 +531,7 @@ function Estudiantes() {
               disabled={paginaActual === totalPaginas || totalPaginas === 0}
               onClick={() => setPaginaActual((pagina) => pagina + 1)}
             >
-              Siguiente â†’
+              Siguiente
             </button>
           </div>
         </div>
