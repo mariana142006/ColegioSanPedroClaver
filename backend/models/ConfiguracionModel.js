@@ -1,6 +1,6 @@
-const conexion = require("../database/conexion");
+﻿const conexion = require("../database/conexion");
 
-// Obtener configuración
+// Obtener configuraciÃ³n
 const obtenerConfiguracion = async () => {
   const [rows] = await conexion.query(
     `
@@ -13,11 +13,11 @@ const obtenerConfiguracion = async () => {
   return rows[0];
 };
 
-// Crear o actualizar configuración
+// Crear o actualizar configuraciÃ³n
 const guardarConfiguracion = async (datos) => {
   const {
     nombre_colegio,
-    año_lectivo,
+    anio_lectivo,
     hora_entrada,
     rector,
     coordinador,
@@ -32,7 +32,7 @@ const guardarConfiguracion = async (datos) => {
             UPDATE configuracion SET
 
             nombre_colegio=?,
-            año_lectivo=?,
+            anio_lectivo=?,
             hora_entrada=?,
             rector=?,
             coordinador=?,
@@ -43,7 +43,7 @@ const guardarConfiguracion = async (datos) => {
             `,
       [
         nombre_colegio,
-        año_lectivo,
+        anio_lectivo,
         hora_entrada,
         rector,
         coordinador,
@@ -59,7 +59,7 @@ const guardarConfiguracion = async (datos) => {
             INSERT INTO configuracion
             (
                 nombre_colegio,
-                año_lectivo,
+                anio_lectivo,
                 hora_entrada,
                 rector,
                 coordinador,
@@ -69,7 +69,7 @@ const guardarConfiguracion = async (datos) => {
             VALUES (?,?,?,?,?,?)
 
             `,
-      [nombre_colegio, año_lectivo, hora_entrada, rector, coordinador, logo],
+      [nombre_colegio, anio_lectivo, hora_entrada, rector, coordinador, logo],
     );
 
     return resultado;
