@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 
 const router = express.Router();
 
@@ -34,6 +34,14 @@ router.post(
   verificarToken,
   verificarRol("Administrador", "Coordinador", "Director"),
   CartaController.guardarCarta
+);
+
+// Eliminar carta/reporte
+router.delete(
+  "/:id",
+  verificarToken,
+  verificarRol("Administrador", "Coordinador", "Director"),
+  CartaController.eliminarCarta
 );
 
 module.exports = router;

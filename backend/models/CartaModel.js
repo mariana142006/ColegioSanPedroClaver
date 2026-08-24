@@ -1,34 +1,29 @@
-const conexion = require("../database/conexion");
+﻿const conexion = require("../database/conexion");
 
 // Obtener todas las cartas
 const obtenerCartas = async () => {
   const [rows] = await conexion.query(`
-    
     SELECT
       c.id_carta,
+      c.id_estudiante,
       c.tipo,
       c.numero_reporte,
       c.fecha_generacion,
       c.archivo_pdf,
       c.observacion,
-
       e.nombres,
       e.documento,
       e.grado
-
     FROM cartas c
-
     INNER JOIN estudiantes e
       ON c.id_estudiante = e.id_estudiante
-
     ORDER BY c.id_carta DESC
-
   `);
 
   return rows;
 };
 
-//Crear carta
+// Crear carta
 const crearCarta = async (datos) => {
   const {
     id_estudiante,
@@ -50,9 +45,7 @@ const crearCarta = async (datos) => {
       archivo_pdf,
       observacion
     )
-
     VALUES (?,?,?,?,?,?)
-
     `,
     [
       id_estudiante,
@@ -61,12 +54,13 @@ const crearCarta = async (datos) => {
       fecha_generacion,
       archivo_pdf,
       observacion,
-    ],
+    ]
   );
 
   return resultado;
 };
 
+// Obtener siguiente número de reporte
 const obtenerSiguienteNumero = async () => {
   const [rows] = await conexion.query(`
     SELECT COUNT(*) AS total
@@ -78,8 +72,22 @@ const obtenerSiguienteNumero = async () => {
   return numero.toString().padStart(4, "0");
 };
 
+// Eliminar carta/reporte
+const eliminarCarta = async (id) => {
+  const [resultado] = await conexion.query(
+    `
+    DELETE FROM cartas
+    WHERE id_carta = ?
+    `,
+    [id]
+  );
+
+  return resultado;
+};
+
 module.exports = {
   obtenerCartas,
   crearCarta,
   obtenerSiguienteNumero,
+  eliminarCarta,
 };
