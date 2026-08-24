@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import api from "../services/api";
 import "../styles/usuarios.css";
 import Swal from "sweetalert2";
@@ -15,6 +15,8 @@ function Llegadas() {
   const [estudianteCarta, setEstudianteCarta] = useState(null);
 
   const [estudiantes, setEstudiantes] = useState([]);
+
+  const [busquedaEstudiante, setBusquedaEstudiante] = useState("");
 
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
@@ -198,23 +200,29 @@ function Llegadas() {
   };
 
   const obtenerAlertas = () => {
-    const alertas = llegadas.filter((item) => item.total_llegadas >= 3);
+    const conteo = {};
 
-    const estudiantesUnicos = [];
+    llegadas.forEach((item) => {
+      const id = Number(item.id_estudiante);
 
-    alertas.forEach((item) => {
-      const existe = estudiantesUnicos.find(
-        (estudiante) => estudiante.id_estudiante === item.id_estudiante,
-      );
+      if (!id) return;
 
-      if (!existe) {
-        estudiantesUnicos.push(item);
+      if (!conteo[id]) {
+        conteo[id] = {
+          id_estudiante: id,
+          nombres: item.nombres,
+          grado: item.grado,
+          total_llegadas: 0,
+        };
       }
+
+      conteo[id].total_llegadas++;
     });
 
-    return estudiantesUnicos;
+    return Object.values(conteo).filter(
+      (item) => item.total_llegadas >= 3
+    );
   };
-
   return (
     <div className="usuarios-container">
       <div className="usuario-header">
@@ -245,23 +253,89 @@ function Llegadas() {
 
               <form onSubmit={guardarLlegada}>
                 <div className="modal-body">
-                  <select
-                    className="form-control mb-3"
-                    name="id_estudiante"
-                    value={formulario.id_estudiante}
-                    onChange={manejarCambio}
-                  >
-                    <option value="">Seleccione estudiante</option>
+                                      <input
+                      type="text"
+                      className="form-control mb-2"
+                      placeholder="Buscar estudiante por nombre..."
+                      value={busquedaEstudiante}
+                      onChange={(e) => {
+                        setBusquedaEstudiante(e.target.value);
 
-                    {estudiantes.map((estudiante) => (
-                      <option
-                        key={estudiante.id_estudiante}
-                        value={estudiante.id_estudiante}
-                      >
-                        {estudiante.nombres} - {estudiante.grado}
-                      </option>
-                    ))}
-                  </select>
+                        setFormulario({
+                          ...formulario,
+                          id_estudiante: "",
+                        });
+                      }}
+                    />
+
+                    <div
+                      style={{
+                        maxHeight: "300px",
+                        overflowY:
+                          estudiantes.filter((estudiante) =>
+                            estudiante.nombres
+                              ?.toLowerCase()
+                              .includes(busquedaEstudiante.toLowerCase())
+                          ).length > 8
+                            ? "auto"
+                            : "hidden",
+                        border: "1px solid #ddd",
+                        borderRadius: "6px",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      {estudiantes
+                        .filter((estudiante) =>
+                          estudiante.nombres
+                            ?.toLowerCase()
+                            .includes(busquedaEstudiante.toLowerCase())
+                        )
+                        .slice(0, 20)
+                        .map((estudiante) => (
+                          <div
+                            key={estudiante.id_estudiante}
+                            onClick={() => {
+                              setFormulario({
+                                ...formulario,
+                                id_estudiante: estudiante.id_estudiante,
+                              });
+
+                              setBusquedaEstudiante(
+                                estudiante.nombres + " - " + estudiante.grado
+                              );
+
+                              consultarLlegadasEstudiante(
+                                estudiante.id_estudiante
+                              );
+                            }}
+                            style={{
+                              padding: "10px",
+                              cursor: "pointer",
+                              borderBottom: "1px solid #eee",
+                              background:
+                                Number(formulario.id_estudiante) ===
+                                Number(estudiante.id_estudiante)
+                                  ? "#f0f0f0"
+                                  : "white",
+                            }}
+                          >
+                            {estudiante.nombres} - {estudiante.grado}
+                          </div>
+                        ))}
+
+                      {estudiantes.length === 0 && (
+                        <div className="text-center text-muted p-3">
+                          No hay estudiantes disponibles.
+                        </div>
+                      )}
+                    </div>
+
+                    {formulario.id_estudiante && (
+                      <div className="alert alert-success py-2">
+                        <strong>Estudiante seleccionado:</strong>{" "}
+                        {busquedaEstudiante}
+                      </div>
+                    )}
 
                   {totalLlegadas > 0 && (
                     <div className="alert alert-info">
@@ -315,8 +389,7 @@ function Llegadas() {
 
       {obtenerAlertas().length > 0 && (
         <div className="alert alert-danger">
-          <h5>⚠️ Alertas de llegadas tardes</h5>
-
+          <h5>Alertas de llegadas tardes</h5>
           {obtenerAlertas().map((item) => (
             <div key={item.id_estudiante} className="mb-3 p-2 rounded">
               <strong>{item.nombres}</strong>
@@ -384,9 +457,7 @@ function Llegadas() {
               <td>{llegada.total_mes}</td>
 
               <td>
-                {llegada.genero_alerta === 1 ? (
-                  <span className="badge bg-danger">Generar carta</span>
-                ) : llegada.total_mes === 2 ? (
+                {llegada.genero_alerta === 1 ? (<span>Generar carta</span>) : llegada.total_mes === 2 ? (
                   <span className="badge bg-warning text-dark">
                     Seguimiento
                   </span>
@@ -546,7 +617,7 @@ function Llegadas() {
                       setMostrarCarta(true);
                     }}
                   >
-                    📄 Generar carta
+                    Generar carta
                   </button>
                 </div>
               </div>
@@ -569,3 +640,11 @@ function Llegadas() {
 }
 
 export default Llegadas;
+
+
+
+
+
+
+
+
