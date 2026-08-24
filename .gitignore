@@ -21,3 +21,6 @@ pnpm-debug.log*
 .DS_Store
 .vscode/
 .idea/
+
+# Archivos de respaldo temporales
+*.backup.jsx

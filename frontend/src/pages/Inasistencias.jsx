@@ -21,6 +21,8 @@ function Inasistencias() {
 
   const [estudiantes, setEstudiantes] = useState([]);
 
+  const [busquedaEstudiante, setBusquedaEstudiante] = useState("");
+
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
   const [formulario, setFormulario] = useState({
@@ -284,23 +286,77 @@ function Inasistencias() {
 
               <form onSubmit={guardarInasistencia}>
                 <div className="modal-body">
-                  <select
-                    className="form-control mb-3"
-                    name="id_estudiante"
-                    value={formulario.id_estudiante}
-                    onChange={manejarCambio}
-                  >
-                    <option value="">Seleccione estudiante</option>
+                  <input
+                    type="text"
+                    className="form-control mb-2"
+                    placeholder="🔎 Buscar estudiante por nombre..."
+                    value={busquedaEstudiante}
+                    onChange={(e) => {
+                      setBusquedaEstudiante(e.target.value);
+                      setFormulario({
+                        ...formulario,
+                        id_estudiante: "",
+                      });
+                    }}
+                  />
 
-                    {estudiantes.map((estudiante) => (
-                      <option
-                        key={estudiante.id_estudiante}
-                        value={estudiante.id_estudiante}
-                      >
-                        {estudiante.nombres} - {estudiante.grado}
-                      </option>
-                    ))}
-                  </select>
+                  <div
+                    style={{
+                      maxHeight: "300px",
+                      overflowY:
+                        estudiantes.filter((estudiante) =>
+                          estudiante.nombres
+                            ?.toLowerCase()
+                            .includes(busquedaEstudiante.toLowerCase())
+                        ).length > 8
+                          ? "auto"
+                          : "hidden",
+                      border: "1px solid #ddd",
+                      borderRadius: "6px",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    {estudiantes
+                      .filter((estudiante) =>
+                        estudiante.nombres
+                          ?.toLowerCase()
+                          .includes(busquedaEstudiante.toLowerCase())
+                      )
+                      .slice(0, 20)
+                      .map((estudiante) => (
+                        <div
+                          key={estudiante.id_estudiante}
+                          onClick={() => {
+                            setFormulario({
+                              ...formulario,
+                              id_estudiante: estudiante.id_estudiante,
+                            });
+
+                            setBusquedaEstudiante(
+                              `${estudiante.nombres} - ${estudiante.grado}`
+                            );
+                          }}
+                          style={{
+                            padding: "10px",
+                            cursor: "pointer",
+                            borderBottom: "1px solid #eee",
+                            background:
+                              Number(formulario.id_estudiante) ===
+                              Number(estudiante.id_estudiante)
+                                ? "#f0f0f0"
+                                : "white",
+                          }}
+                        >
+                          {estudiante.nombres} - {estudiante.grado}
+                        </div>
+                      ))}
+
+                    {estudiantes.length === 0 && (
+                      <div className="text-center text-muted p-3">
+                        No hay estudiantes disponibles.
+                      </div>
+                    )}
+                  </div>
 
                   <input
                     className="form-control mb-3"
