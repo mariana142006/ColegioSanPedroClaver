@@ -18,9 +18,7 @@ function Uniformes() {
 
   const [formulario, setFormulario] = useState({
     id_estudiante: "",
-    fecha: "",
-    hora: "",
-    motivo: "",
+    fecha: "",`r`n    motivo: "",
   });
 
   const cargarUniformes = async () => {
@@ -77,7 +75,6 @@ function Uniformes() {
     setFormulario({
       id_estudiante: "",
       fecha: "",
-      hora: "",
       motivo: "",
     });
 
@@ -91,7 +88,6 @@ function Uniformes() {
     setFormulario({
       id_estudiante: "",
       fecha: "",
-      hora: "",
       motivo: "",
     });
 
@@ -111,10 +107,6 @@ function Uniformes() {
       return;
     }
 
-    if (!formulario.hora) {
-      Swal.fire("Atención", "Debe seleccionar la hora.", "warning");
-      return;
-    }
 
     if (!formulario.motivo) {
       Swal.fire("Atención", "Debe seleccionar la falta de uniforme.", "warning");
@@ -443,18 +435,6 @@ function Uniformes() {
                   />
 
                   <label className="form-label fw-bold">
-                    Hora
-                  </label>
-
-                  <input
-                    className="form-control mb-3"
-                    type="time"
-                    name="hora"
-                    value={formulario.hora}
-                    onChange={manejarCambio}
-                  />
-
-                  <label className="form-label fw-bold">
                     Falta de uniforme
                   </label>
 
@@ -685,3 +665,7 @@ function Uniformes() {
 }
 
 export default Uniformes;
+
+
+
+
