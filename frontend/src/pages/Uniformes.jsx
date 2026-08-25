@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 import Swal from "sweetalert2";
 import { FaEdit, FaTrash } from "react-icons/fa";
@@ -18,7 +18,8 @@ function Uniformes() {
 
   const [formulario, setFormulario] = useState({
     id_estudiante: "",
-    fecha: "",`r`n    motivo: "",
+    fecha: "",
+    motivo: "",
   });
 
   const cargarUniformes = async () => {
@@ -665,7 +666,3 @@ function Uniformes() {
 }
 
 export default Uniformes;
-
-
-
-

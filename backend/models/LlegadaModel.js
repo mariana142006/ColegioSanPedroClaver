@@ -34,7 +34,24 @@ const obtenerLlegadas = async () => {
 // CREAR LLEGADA TARDE
 // ==========================================
 const crearLlegada = async (datos) => {
-  const { id_estudiante, fecha, hora, observacion } = datos;
+  const {
+    id_estudiante,
+    fecha,
+    observacion,
+  } = datos;
+
+  // ==========================================
+  // GENERAR HORA AUTOMÁTICAMENTE - COLOMBIA
+  // ==========================================
+  const ahora = new Date();
+
+  const hora = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "America/Bogota",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(ahora);
 
   // ==========================================
   // CONTAR LLEGADAS DEL MISMO MES
@@ -57,7 +74,10 @@ const crearLlegada = async (datos) => {
   // ==========================================
   const generaAlerta = totalMes >= 3 ? 1 : 0;
 
-  const estadoAlerta = generaAlerta === 1 ? "Pendiente" : "Normal";
+  // La tabla acepta Pendiente / Generada / Atendida
+  const estadoAlerta = generaAlerta === 1
+    ? "Pendiente"
+    : "Atendida";
 
   // ==========================================
   // INSERTAR LLEGADA
@@ -80,7 +100,7 @@ const crearLlegada = async (datos) => {
       id_estudiante,
       fecha,
       hora,
-      observacion,
+      observacion || null,
       totalMes,
       generaAlerta,
       estadoAlerta,
@@ -99,7 +119,11 @@ const crearLlegada = async (datos) => {
 // ACTUALIZAR LLEGADA
 // ==========================================
 const actualizarLlegada = async (id, datos) => {
-  const { id_estudiante, fecha, hora, observacion } = datos;
+  const {
+    id_estudiante,
+    fecha,
+    observacion,
+  } = datos;
 
   // Buscar datos anteriores
   const [anterior] = await conexion.query(
@@ -120,18 +144,24 @@ const actualizarLlegada = async (id, datos) => {
   const estudianteAnterior = anterior[0].id_estudiante;
   const fechaAnterior = anterior[0].fecha;
 
-  // Actualizar
+  // ==========================================
+  // ACTUALIZAR SIN CAMBIAR LA HORA
+  // ==========================================
   const [resultado] = await conexion.query(
     `
       UPDATE llegadas_tarde
       SET
         id_estudiante = ?,
         fecha = ?,
-        hora = ?,
         observacion = ?
       WHERE id_llegada = ?
     `,
-    [id_estudiante, fecha, hora, observacion, id],
+    [
+      id_estudiante,
+      fecha,
+      observacion || null,
+      id,
+    ],
   );
 
   // Recalcular el mes anterior
@@ -191,7 +221,9 @@ const contarLlegadasEstudiante = async (id_estudiante, fecha = null) => {
   let fechaReferencia = fecha;
 
   if (!fechaReferencia) {
-    fechaReferencia = new Date().toISOString().substring(0, 10);
+    fechaReferencia = new Date()
+      .toISOString()
+      .substring(0, 10);
   }
 
   const [rows] = await conexion.query(
@@ -212,7 +244,6 @@ const contarLlegadasEstudiante = async (id_estudiante, fecha = null) => {
 // ACTUALIZAR TOTALES DEL MES
 // ==========================================
 const actualizarTotalesMes = async (id_estudiante, fecha) => {
-  // Obtener total del mes
   const [resultado] = await conexion.query(
     `
       SELECT COUNT(*) AS total
@@ -228,9 +259,10 @@ const actualizarTotalesMes = async (id_estudiante, fecha) => {
 
   const alerta = total >= 3 ? 1 : 0;
 
-  const estado = total >= 3 ? "Pendiente" : "Normal";
+  const estado = total >= 3
+    ? "Pendiente"
+    : "Atendida";
 
-  // Actualizar registros de ese mismo mes
   await conexion.query(
     `
       UPDATE llegadas_tarde
@@ -242,7 +274,14 @@ const actualizarTotalesMes = async (id_estudiante, fecha) => {
         AND MONTH(fecha) = MONTH(?)
         AND YEAR(fecha) = YEAR(?)
     `,
-    [total, alerta, estado, id_estudiante, fecha, fecha],
+    [
+      total,
+      alerta,
+      estado,
+      id_estudiante,
+      fecha,
+      fecha,
+    ],
   );
 };
 
@@ -253,7 +292,7 @@ const marcarAlertaRevisada = async (id_estudiante, fecha) => {
   await conexion.query(
     `
       UPDATE llegadas_tarde
-      SET estado_alerta = 'Revisada'
+      SET estado_alerta = 'Atendida'
       WHERE id_estudiante = ?
         AND MONTH(fecha) = MONTH(?)
         AND YEAR(fecha) = YEAR(?)

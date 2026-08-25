@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 import "../styles/usuarios.css";
 import Swal from "sweetalert2";
@@ -29,7 +29,6 @@ function Llegadas() {
   const [formulario, setFormulario] = useState({
     id_estudiante: "",
     fecha: "",
-    hora: "",
     observacion: "",
   });
 
@@ -84,19 +83,6 @@ function Llegadas() {
   const guardarLlegada = async (e) => {
     e.preventDefault();
 
-    const horaMinima = configuracion?.hora_entrada || "06:20";
-
-    if (formulario.hora < horaMinima) {
-      Swal.fire({
-        title: "Hora no válida",
-        text: "Las llegadas tarde solo se registran desde las 06:20 a.m.",
-        icon: "warning",
-        confirmButtonText: "Aceptar",
-      });
-
-      return;
-    }
-
     try {
       await api.post("/llegadas", formulario);
 
@@ -113,8 +99,7 @@ function Llegadas() {
       setFormulario({
         id_estudiante: "",
         fecha: "",
-        hora: "",
-        observacion: "",
+    observacion: "",
       });
 
       setMostrarFormulario(false);
@@ -353,14 +338,6 @@ function Llegadas() {
                     onChange={manejarCambio}
                   />
 
-                  <input
-                    className="form-control mb-3"
-                    type="time"
-                    name="hora"
-                    value={formulario.hora}
-                    onChange={manejarCambio}
-                  />
-
                   <textarea
                     className="form-control"
                     name="observacion"
@@ -532,19 +509,6 @@ function Llegadas() {
                   }
                 />
 
-                <input
-                  className="form-control mb-3"
-                  type="time"
-                  value={llegadaEditar.hora}
-                  onChange={(e) =>
-                    setLlegadaEditar({
-                      ...llegadaEditar,
-
-                      hora: e.target.value,
-                    })
-                  }
-                />
-
                 <textarea
                   className="form-control"
                   value={llegadaEditar.observacion}
@@ -640,11 +604,3 @@ function Llegadas() {
 }
 
 export default Llegadas;
-
-
-
-
-
-
-
-

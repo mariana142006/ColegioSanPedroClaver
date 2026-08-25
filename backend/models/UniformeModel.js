@@ -1,42 +1,49 @@
 const conexion = require("../database/conexion");
 
-// listar uniformes
+// ==========================================
+// LISTAR UNIFORMES
+// ==========================================
 const obtenerUniformes = async () => {
   const [rows] = await conexion.query(`
+    SELECT
+      u.id_uniforme,
+      u.id_estudiante,
+      u.fecha,
+      u.motivo,
+      u.observacion,
+      u.genero_alerta,
 
-        SELECT
+      e.nombres,
+      e.documento,
+      e.grado,
 
-        u.id_uniforme,
-        u.id_estudiante,
-        u.fecha,
-        u.motivo,
-
-        e.nombres,
-        e.documento,
-        e.grado,
-
-        (
+      (
         SELECT COUNT(*)
         FROM uniforme u2
         WHERE u2.id_estudiante = u.id_estudiante
-        ) AS total_uniforme
+      ) AS total_uniforme
 
-        FROM uniforme u
+    FROM uniforme u
 
-        INNER JOIN estudiantes e
+    INNER JOIN estudiantes e
+      ON u.id_estudiante = e.id_estudiante
 
-        ON u.id_estudiante = e.id_estudiante
-
-        ORDER BY u.id_uniforme DESC
-
-    `);
+    ORDER BY u.id_uniforme DESC
+  `);
 
   return rows;
 };
 
-// crear reporte
+// ==========================================
+// CREAR REPORTE DE UNIFORME
+// ==========================================
 const crearUniforme = async (datos) => {
-  const { id_estudiante, fecha, hora, motivo, observacion } = datos;
+  const {
+    id_estudiante,
+    fecha,
+    motivo,
+    observacion,
+  } = datos;
 
   const [resultado] = await conexion.query(
     `
@@ -44,17 +51,15 @@ const crearUniforme = async (datos) => {
       (
         id_estudiante,
         fecha,
-        hora,
         motivo,
         observacion,
         genero_alerta
       )
-      VALUES (?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?)
     `,
     [
       id_estudiante,
       fecha,
-      hora,
       motivo,
       observacion || null,
       0,
@@ -64,36 +69,45 @@ const crearUniforme = async (datos) => {
   return resultado;
 };
 
-// actualizar reporte
+// ==========================================
+// ACTUALIZAR REPORTE DE UNIFORME
+// ==========================================
 const actualizarUniforme = async (id, datos) => {
-  const { id_estudiante, fecha, hora, motivo } = datos;
+  const {
+    id_estudiante,
+    fecha,
+    motivo,
+    observacion,
+  } = datos;
 
   const [resultado] = await conexion.query(
     `
-
-        UPDATE uniforme SET
-
-        id_estudiante=?,
-        fecha=?,
-        hora=?,
-        motivo=?
-
-        WHERE id_uniforme=?
-
-        `,
-
-    [id_estudiante, fecha, hora, motivo, id],
+      UPDATE uniforme
+      SET
+        id_estudiante = ?,
+        fecha = ?,
+        motivo = ?,
+        observacion = ?
+      WHERE id_uniforme = ?
+    `,
+    [
+      id_estudiante,
+      fecha,
+      motivo,
+      observacion || null,
+      id,
+    ],
   );
 
   return resultado;
 };
 
-// eliminar reporte
-
+// ==========================================
+// ELIMINAR REPORTE DE UNIFORME
+// ==========================================
 const eliminarUniforme = async (id) => {
   const [resultado] = await conexion.query(
-    "DELETE FROM uniforme WHERE id_uniforme=?",
-
+    "DELETE FROM uniforme WHERE id_uniforme = ?",
     [id],
   );
 
