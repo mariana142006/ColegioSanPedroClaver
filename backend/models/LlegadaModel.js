@@ -41,7 +41,7 @@ const crearLlegada = async (datos) => {
   } = datos;
 
   // ==========================================
-  // GENERAR HORA AUTOMÁTICAMENTE - COLOMBIA
+  // GENERAR HORA REAL - COLOMBIA
   // ==========================================
   const ahora = new Date();
 
@@ -74,7 +74,6 @@ const crearLlegada = async (datos) => {
   // ==========================================
   const generaAlerta = totalMes >= 3 ? 1 : 0;
 
-  // La tabla acepta Pendiente / Generada / Atendida
   const estadoAlerta = generaAlerta === 1
     ? "Pendiente"
     : "Atendida";
@@ -117,6 +116,7 @@ const crearLlegada = async (datos) => {
 
 // ==========================================
 // ACTUALIZAR LLEGADA
+// LA HORA ORIGINAL NO SE MODIFICA
 // ==========================================
 const actualizarLlegada = async (id, datos) => {
   const {
@@ -125,7 +125,9 @@ const actualizarLlegada = async (id, datos) => {
     observacion,
   } = datos;
 
-  // Buscar datos anteriores
+  // ==========================================
+  // BUSCAR DATOS ANTERIORES
+  // ==========================================
   const [anterior] = await conexion.query(
     `
       SELECT
@@ -164,11 +166,21 @@ const actualizarLlegada = async (id, datos) => {
     ],
   );
 
-  // Recalcular el mes anterior
-  await actualizarTotalesMes(estudianteAnterior, fechaAnterior);
+  // ==========================================
+  // RECALCULAR MES ANTERIOR
+  // ==========================================
+  await actualizarTotalesMes(
+    estudianteAnterior,
+    fechaAnterior,
+  );
 
-  // Recalcular el nuevo mes
-  await actualizarTotalesMes(id_estudiante, fecha);
+  // ==========================================
+  // RECALCULAR NUEVO MES
+  // ==========================================
+  await actualizarTotalesMes(
+    id_estudiante,
+    fecha,
+  );
 
   return resultado;
 };
@@ -177,7 +189,9 @@ const actualizarLlegada = async (id, datos) => {
 // ELIMINAR LLEGADA
 // ==========================================
 const eliminarLlegada = async (id) => {
-  // Buscar la llegada antes de eliminarla
+  // ==========================================
+  // BUSCAR LA LLEGADA ANTES DE ELIMINAR
+  // ==========================================
   const [llegada] = await conexion.query(
     `
       SELECT
@@ -196,7 +210,9 @@ const eliminarLlegada = async (id) => {
   const estudiante = llegada[0].id_estudiante;
   const fecha = llegada[0].fecha;
 
-  // Eliminar
+  // ==========================================
+  // ELIMINAR
+  // ==========================================
   await conexion.query(
     `
       DELETE FROM llegadas_tarde
@@ -205,19 +221,26 @@ const eliminarLlegada = async (id) => {
     [id],
   );
 
-  // Recalcular después de eliminar
-  await actualizarTotalesMes(estudiante, fecha);
+  // ==========================================
+  // RECALCULAR DESPUÉS DE ELIMINAR
+  // ==========================================
+  await actualizarTotalesMes(
+    estudiante,
+    fecha,
+  );
 
   return {
-    id_estudiante: estudiante,
-    fecha: fecha,
+    mensaje: "Llegada eliminada correctamente",
   };
 };
 
 // ==========================================
 // CONTAR LLEGADAS DEL MES
 // ==========================================
-const contarLlegadasEstudiante = async (id_estudiante, fecha = null) => {
+const contarLlegadasEstudiante = async (
+  id_estudiante,
+  fecha = null,
+) => {
   let fechaReferencia = fecha;
 
   if (!fechaReferencia) {
@@ -234,16 +257,23 @@ const contarLlegadasEstudiante = async (id_estudiante, fecha = null) => {
         AND MONTH(fecha) = MONTH(?)
         AND YEAR(fecha) = YEAR(?)
     `,
-    [id_estudiante, fechaReferencia, fechaReferencia],
+    [
+      id_estudiante,
+      fechaReferencia,
+      fechaReferencia,
+    ],
   );
 
-  return rows[0];
+  return Number(rows[0].total);
 };
 
 // ==========================================
 // ACTUALIZAR TOTALES DEL MES
 // ==========================================
-const actualizarTotalesMes = async (id_estudiante, fecha) => {
+const actualizarTotalesMes = async (
+  id_estudiante,
+  fecha,
+) => {
   const [resultado] = await conexion.query(
     `
       SELECT COUNT(*) AS total
@@ -252,7 +282,11 @@ const actualizarTotalesMes = async (id_estudiante, fecha) => {
         AND MONTH(fecha) = MONTH(?)
         AND YEAR(fecha) = YEAR(?)
     `,
-    [id_estudiante, fecha, fecha],
+    [
+      id_estudiante,
+      fecha,
+      fecha,
+    ],
   );
 
   const total = Number(resultado[0].total);
@@ -263,6 +297,9 @@ const actualizarTotalesMes = async (id_estudiante, fecha) => {
     ? "Pendiente"
     : "Atendida";
 
+  // ==========================================
+  // ACTUALIZAR REGISTROS DEL MISMO MES
+  // ==========================================
   await conexion.query(
     `
       UPDATE llegadas_tarde
@@ -286,9 +323,12 @@ const actualizarTotalesMes = async (id_estudiante, fecha) => {
 };
 
 // ==========================================
-// MARCAR ALERTA COMO REVISADA
+// MARCAR ALERTA COMO ATENDIDA
 // ==========================================
-const marcarAlertaRevisada = async (id_estudiante, fecha) => {
+const marcarAlertaRevisada = async (
+  id_estudiante,
+  fecha,
+) => {
   await conexion.query(
     `
       UPDATE llegadas_tarde
@@ -296,14 +336,17 @@ const marcarAlertaRevisada = async (id_estudiante, fecha) => {
       WHERE id_estudiante = ?
         AND MONTH(fecha) = MONTH(?)
         AND YEAR(fecha) = YEAR(?)
-        AND genero_alerta = 1
     `,
-    [id_estudiante, fecha, fecha],
+    [
+      id_estudiante,
+      fecha,
+      fecha,
+    ],
   );
 };
 
 // ==========================================
-// EXPORTAR
+// EXPORTAR FUNCIONES
 // ==========================================
 module.exports = {
   obtenerLlegadas,
