@@ -136,23 +136,70 @@ function Inasistencias() {
   };
 
   const obtenerAlertas = () => {
+    // SOLO "Sin excusa" puede generar una alerta.
     const alertas = inasistencias.filter(
-      (item) => item.total_inasistencias >= 3,
+      (item) =>
+        item.tipo === "Sin excusa" &&
+        Number(item.total_inasistencias) >= 3
     );
 
     const estudiantesUnicos = [];
 
     alertas.forEach((item) => {
       const existe = estudiantesUnicos.find(
-        (estudiante) => estudiante.id_estudiante === item.id_estudiante,
+        (estudiante) =>
+          Number(estudiante.id_estudiante) === Number(item.id_estudiante)
       );
 
       if (!existe) {
-        estudiantesUnicos.push(item);
+        const estudiante = estudiantes.find(
+          (e) =>
+            Number(e.id_estudiante) === Number(item.id_estudiante)
+        );
+
+        estudiantesUnicos.push({
+          ...item,
+          telefono_acudiente: estudiante?.telefono_acudiente || "",
+          nombre_acudiente: estudiante?.nombre_acudiente || "",
+        });
       }
     });
 
     return estudiantesUnicos;
+  };
+  // ============================================================
+  // NOTIFICAR ACUDIENTE POR WHATSAPP
+  // ============================================================
+  const notificarAcudienteWhatsApp = (item) => {
+    if (!item.telefono_acudiente) {
+      Swal.fire(
+        "Sin teléfono",
+        "Este estudiante no tiene registrado un número de acudiente.",
+        "warning"
+      );
+      return;
+    }
+
+    let telefono = String(item.telefono_acudiente)
+      .replace(/\D/g, "");
+
+    // Número celular colombiano de 10 dígitos
+    if (telefono.length === 10 && telefono.startsWith("3")) {
+      telefono = "57" + telefono;
+    }
+
+    const mensaje =
+      `Cordial saludo, ${item.nombre_acudiente || "señor(a) acudiente"}. ` +
+      `Nos permitimos informarle que el estudiante ${item.nombres}, ` +
+      `del grado ${item.grado}, ha acumulado ${item.total_inasistencias} ` +
+      `inasistencias. ` +
+      `Agradecemos su atención y acompañamiento para fortalecer ` +
+      `la asistencia del estudiante al Colegio San Pedro Claver.`;
+
+    const url =
+      `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+
+    window.open(url, "_blank");
   };
 
   return (
@@ -186,10 +233,19 @@ function Inasistencias() {
                     </span>
                     <br />
                     <button
-                      className="btn btn-azul btn-sm mt-3"
+                      className="btn btn-azul btn-sm mt-3 me-2"
                       onClick={() => setReportesVer(item.id_estudiante)}
                     >
                       Ver reportes
+                    </button>
+
+                    <button
+                      className="btn btn-success btn-sm mt-3"
+                      onClick={() =>
+                        notificarAcudienteWhatsApp(item)
+                      }
+                    >
+                      Notificar acudiente por WhatsApp
                     </button>
                   </div>
                 </div>

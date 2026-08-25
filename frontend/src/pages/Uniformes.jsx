@@ -49,11 +49,15 @@ function Uniformes() {
       if (!id) return;
 
       if (!conteo[id]) {
+        const estudiante = estudiantes.find((e) => Number(e.id_estudiante) === id);
+
         conteo[id] = {
           id_estudiante: id,
           nombres: item.nombres,
           grado: item.grado,
           total_uniforme: 0,
+          telefono_acudiente: estudiante?.telefono_acudiente || "",
+          nombre_acudiente: estudiante?.nombre_acudiente || "",
         };
       }
 
@@ -65,6 +69,38 @@ function Uniformes() {
     );
   };
 
+  // ============================================================
+  // NOTIFICAR ACUDIENTE POR WHATSAPP
+  // ============================================================
+  const notificarAcudienteWhatsApp = (item) => {
+    if (!item.telefono_acudiente) {
+      Swal.fire(
+        "Sin teléfono",
+        "Este estudiante no tiene registrado un número de acudiente.",
+        "warning"
+      );
+      return;
+    }
+
+    let telefono = String(item.telefono_acudiente).replace(/\D/g, "");
+
+    if (telefono.length === 10 && telefono.startsWith("3")) {
+      telefono = "57" + telefono;
+    }
+
+    const mensaje =
+      `Cordial saludo, ${item.nombre_acudiente || "señor(a) acudiente"}. ` +
+      `Nos permitimos informarle que el estudiante ${item.nombres}, ` +
+      `del grado ${item.grado}, ha acumulado ${item.total_uniforme} ` +
+      `reportes relacionados con el uso inadecuado del uniforme. ` +
+      `Agradecemos su atención y acompañamiento en el cumplimiento ` +
+      `de las normas de presentación personal del Colegio San Pedro Claver.`;
+
+    const url =
+      `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+
+    window.open(url, "_blank");
+  };
   const manejarCambio = (e) => {
     setFormulario({
       ...formulario,
@@ -249,12 +285,21 @@ function Uniformes() {
                       <br />
 
                       <button
-                        className="btn btn-azul btn-sm mt-3"
+                        className="btn btn-azul btn-sm mt-3 me-2"
                         onClick={() =>
                           setReportesVer(item.id_estudiante)
                         }
                       >
                         Ver reportes
+                      </button>
+
+                      <button
+                        className="btn btn-success btn-sm mt-3"
+                        onClick={() =>
+                          notificarAcudienteWhatsApp(item)
+                        }
+                      >
+                        Notificar acudiente por WhatsApp
                       </button>
                     </div>
                   </div>

@@ -21,6 +21,7 @@ const obtenerInasistencias = async () => {
         SELECT COUNT(*)
         FROM inasistencias i2
         WHERE i2.id_estudiante = i.id_estudiante
+          AND i2.tipo = 'Sin excusa'
       ) AS total_inasistencias
 
     FROM inasistencias i
@@ -43,11 +44,12 @@ const actualizarEstadoEstudiante = async (id_estudiante) => {
     SELECT COUNT(*) AS total
     FROM inasistencias
     WHERE id_estudiante = ?
+      AND tipo = 'Sin excusa'
     `,
     [id_estudiante],
   );
 
-  const total = conteo[0].total;
+  const total = Number(conteo[0].total);
 
   let estado = "Normal";
 
@@ -57,13 +59,28 @@ const actualizarEstadoEstudiante = async (id_estudiante) => {
     estado = "Seguimiento";
   }
 
+  // El estado se aplica solamente a las inasistencias
+  // que son "Sin excusa".
   await conexion.query(
     `
     UPDATE inasistencias
     SET estado = ?
     WHERE id_estudiante = ?
+      AND tipo = 'Sin excusa'
     `,
     [estado, id_estudiante],
+  );
+
+  // Las inasistencias justificadas no deben quedar
+  // con estado de alerta por el conteo de Sin excusa.
+  await conexion.query(
+    `
+    UPDATE inasistencias
+    SET estado = 'Normal'
+    WHERE id_estudiante = ?
+      AND tipo <> 'Sin excusa'
+    `,
+    [id_estudiante],
   );
 
   return {
@@ -76,7 +93,12 @@ const actualizarEstadoEstudiante = async (id_estudiante) => {
 // CREAR INASISTENCIA
 // ==========================================
 const crearInasistencia = async (datos) => {
-  const { id_estudiante, fecha, tipo, observacion } = datos;
+  const {
+    id_estudiante,
+    fecha,
+    tipo,
+    observacion,
+  } = datos;
 
   const [resultado] = await conexion.query(
     `
@@ -90,10 +112,16 @@ const crearInasistencia = async (datos) => {
     )
     VALUES (?, ?, ?, ?, ?)
     `,
-    [id_estudiante, fecha, tipo, observacion, "Normal"],
+    [
+      id_estudiante,
+      fecha,
+      tipo,
+      observacion,
+      "Normal",
+    ],
   );
 
-  // Recalcular estado después de crear
+  // Recalcular estado después de crear.
   await actualizarEstadoEstudiante(id_estudiante);
 
   return resultado;
@@ -103,7 +131,12 @@ const crearInasistencia = async (datos) => {
 // ACTUALIZAR INASISTENCIA
 // ==========================================
 const actualizarInasistencia = async (id, datos) => {
-  const { id_estudiante, fecha, tipo, observacion } = datos;
+  const {
+    id_estudiante,
+    fecha,
+    tipo,
+    observacion,
+  } = datos;
 
   // Obtener estudiante anterior
   const [registro] = await conexion.query(
@@ -132,14 +165,22 @@ const actualizarInasistencia = async (id, datos) => {
       observacion = ?
     WHERE id_inasistencia = ?
     `,
-    [id_estudiante, fecha, tipo, observacion, id],
+    [
+      id_estudiante,
+      fecha,
+      tipo,
+      observacion,
+      id,
+    ],
   );
 
   // Recalcular estudiante nuevo
   await actualizarEstadoEstudiante(id_estudiante);
 
   // Si cambió de estudiante, recalcular el anterior
-  if (Number(estudianteAnterior) !== Number(id_estudiante)) {
+  if (
+    Number(estudianteAnterior) !== Number(id_estudiante)
+  ) {
     await actualizarEstadoEstudiante(estudianteAnterior);
   }
 
