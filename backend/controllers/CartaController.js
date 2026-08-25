@@ -7,10 +7,12 @@ const listarCartas = async (req, res) => {
   try {
     const datos = await Carta.obtenerCartas();
 
+    console.log("Cartas encontradas:", datos.length);
+
     res.json(datos);
 
   } catch (error) {
-    console.log("Error listando cartas:", error);
+    console.error("ERROR LISTANDO CARTAS:", error);
 
     res.status(500).json({
       mensaje: error.message,
@@ -23,7 +25,48 @@ const listarCartas = async (req, res) => {
 // ==========================================
 const guardarCarta = async (req, res) => {
   try {
+    console.log("==========================================");
+    console.log("INTENTO DE GUARDAR CARTA");
+    console.log("Datos recibidos:", req.body);
+    console.log("==========================================");
+
+    const {
+      id_estudiante,
+      tipo,
+      numero_reporte,
+      fecha_generacion,
+      archivo_pdf,
+      observacion,
+    } = req.body;
+
+    if (!id_estudiante) {
+      return res.status(400).json({
+        mensaje: "Falta id_estudiante.",
+      });
+    }
+
+    if (!tipo) {
+      return res.status(400).json({
+        mensaje: "Falta tipo.",
+      });
+    }
+
+    if (!numero_reporte) {
+      return res.status(400).json({
+        mensaje: "Falta numero_reporte.",
+      });
+    }
+
+    if (!fecha_generacion) {
+      return res.status(400).json({
+        mensaje: "Falta fecha_generacion.",
+      });
+    }
+
     const resultado = await Carta.crearCarta(req.body);
+
+    console.log("CARTA GUARDADA CORRECTAMENTE");
+    console.log("ID generado:", resultado.insertId);
 
     res.json({
       mensaje: "Carta guardada correctamente",
@@ -31,10 +74,16 @@ const guardarCarta = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("Error guardando carta:", error);
+    console.error("==========================================");
+    console.error("ERROR GUARDANDO CARTA");
+    console.error("Mensaje:", error.message);
+    console.error("Código:", error.code);
+    console.error("SQL:", error.sql);
+    console.error("==========================================");
 
     res.status(500).json({
       mensaje: error.message,
+      codigo: error.code || null,
     });
   }
 };
@@ -46,12 +95,14 @@ const obtenerNumeroReporte = async (req, res) => {
   try {
     const numero = await Carta.obtenerSiguienteNumero();
 
+    console.log("Siguiente número de reporte:", numero);
+
     res.json({
       numero,
     });
 
   } catch (error) {
-    console.log("Error obteniendo número de reporte:", error);
+    console.error("ERROR OBTENIENDO NÚMERO:", error);
 
     res.status(500).json({
       mensaje: error.message,
@@ -60,7 +111,7 @@ const obtenerNumeroReporte = async (req, res) => {
 };
 
 // ==========================================
-// ELIMINAR CARTA / REPORTE
+// ELIMINAR CARTA
 // ==========================================
 const eliminarCarta = async (req, res) => {
   try {
@@ -85,7 +136,7 @@ const eliminarCarta = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("Error eliminando carta:", error);
+    console.error("ERROR ELIMINANDO CARTA:", error);
 
     res.status(500).json({
       mensaje: error.message,
