@@ -34,9 +34,11 @@ const crearLlegada = async (req, res) => {
     await Llegada.crearLlegada(req.body);
 
     // Contar llegadas del mismo mes
-    const total = await Llegada.contarLlegadasEstudiante(id_estudiante, fecha);
-
-    const totalMes = Number(total.total);
+    // El modelo devuelve directamente un número
+    const totalMes = await Llegada.contarLlegadasEstudiante(
+      id_estudiante,
+      fecha
+    );
 
     const alerta = totalMes >= 3 ? 1 : 0;
 
@@ -44,7 +46,7 @@ const crearLlegada = async (req, res) => {
       mensaje: "Llegada registrada correctamente",
       total_mes: totalMes,
       genero_alerta: alerta,
-      estado_alerta: alerta === 1 ? "Pendiente" : "Normal",
+      estado_alerta: alerta === 1 ? "Pendiente" : "Atendida",
     });
   } catch (error) {
     console.log("Error registrando llegada:", error);
@@ -106,7 +108,9 @@ const contarLlegadasEstudiante = async (req, res) => {
 
     const total = await Llegada.contarLlegadasEstudiante(id);
 
-    res.json(total);
+    res.json({
+      total: total,
+    });
   } catch (error) {
     console.log("Error consultando llegadas:", error);
 
