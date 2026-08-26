@@ -238,6 +238,7 @@ function Llegadas() {
           nombres: item.nombres,
           grado: item.grado,
           total_llegadas: 0,
+          carta_generada: Number(item.carta_generada || 0),
           telefono_acudiente: estudiante?.telefono_acudiente || "",
           nombre_acudiente: estudiante?.nombre_acudiente || "",
         };
@@ -247,10 +248,11 @@ function Llegadas() {
     });
 
     return Object.values(conteo).filter(
-      (item) => item.total_llegadas >= 3
+      (item) =>
+        Math.floor(Number(item.total_llegadas) / 3) >
+        Number(item.carta_generada || 0)
     );
   };
-
   // ============================================================
   // NOTIFICAR ACUDIENTE POR WHATSAPP
   // ============================================================
@@ -872,9 +874,7 @@ function Llegadas() {
           tipo="llegada"
           estudiante={estudianteCarta}
           total={estudianteCarta?.total_mes}
-          onCerrar={() =>
-            setMostrarCarta(false)
-          }
+          onCerrar={() => { setMostrarCarta(false); cargarLlegadas(); }}
           onGenerarPDF={() => {}}
         />
       )}

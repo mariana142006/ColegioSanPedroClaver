@@ -17,7 +17,14 @@ const obtenerLlegadas = async () => {
 
       e.nombres,
       e.documento,
-      e.grado
+      e.grado,
+
+      (
+        SELECT COUNT(*)
+        FROM cartas c
+        WHERE c.id_estudiante = l.id_estudiante
+          AND c.tipo = 'llegada'
+      ) AS carta_generada
 
     FROM llegadas_tarde l
 
