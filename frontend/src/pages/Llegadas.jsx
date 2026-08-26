@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import api from "../services/api";
 import "../styles/usuarios.css";
 import Swal from "sweetalert2";
@@ -12,6 +12,7 @@ function Llegadas() {
   const [estudianteCarta, setEstudianteCarta] = useState(null);
   const [estudiantes, setEstudiantes] = useState([]);
   const [busquedaEstudiante, setBusquedaEstudiante] = useState("");
+  const [busquedaEstudianteEditar, setBusquedaEstudianteEditar] = useState("");
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [llegadaEditar, setLlegadaEditar] = useState(null);
   const [totalLlegadas, setTotalLlegadas] = useState(0);
@@ -337,13 +338,19 @@ function Llegadas() {
                 <div className="modal-body">
 
                   {/* BUSCAR ESTUDIANTE */}
+                  <label className="form-label fw-bold">
+                    Buscar estudiante
+                  </label>
+
                   <input
                     type="text"
                     className="form-control mb-2"
-                    placeholder="Buscar estudiante por nombre..."
+                    placeholder="Escriba nombre o documento..."
                     value={busquedaEstudiante}
                     onChange={(e) => {
-                      setBusquedaEstudiante(e.target.value);
+                      const valor = e.target.value;
+
+                      setBusquedaEstudiante(valor);
 
                       setFormulario({
                         ...formulario,
@@ -355,83 +362,92 @@ function Llegadas() {
                   />
 
                   {/* LISTA ESTUDIANTES */}
-                  <div
-                    style={{
-                      maxHeight: "300px",
-                      overflowY:
-                        estudiantes.filter((estudiante) =>
-                          estudiante.nombres
-                            ?.toLowerCase()
-                            .includes(
-                              busquedaEstudiante.toLowerCase()
-                            )
-                        ).length > 8
-                          ? "auto"
-                          : "hidden",
-                      border: "1px solid #ddd",
-                      borderRadius: "6px",
-                      marginBottom: "16px",
-                    }}
-                  >
+                  {busquedaEstudiante.trim() && !formulario.id_estudiante && (
+                    <div
+                      style={{
+                        maxHeight: "250px",
+                        overflowY: "auto",
+                        border: "1px solid #ddd",
+                        borderRadius: "6px",
+                        marginBottom: "16px",
+                        backgroundColor: "white",
+                      }}
+                    >
+                      {estudiantes
+                        .filter((estudiante) => {
+                          const texto =
+                            busquedaEstudiante.toLowerCase().trim();
 
-                    {estudiantes
-                      .filter((estudiante) =>
-                        estudiante.nombres
-                          ?.toLowerCase()
-                          .includes(
-                            busquedaEstudiante.toLowerCase()
-                          )
-                      )
-                      .slice(0, 20)
-                      .map((estudiante) => (
-                        <div
-                          key={estudiante.id_estudiante}
-                          onClick={() => {
-                            setFormulario({
-                              ...formulario,
-                              id_estudiante:
-                                estudiante.id_estudiante,
-                            });
+                          const nombre =
+                            estudiante.nombres?.toLowerCase() || "";
 
-                            setBusquedaEstudiante(
-                              estudiante.nombres +
-                                " - " +
-                                estudiante.grado
-                            );
+                          const documento =
+                            String(estudiante.documento || "").toLowerCase();
 
-                            consultarLlegadasEstudiante(
-                              estudiante.id_estudiante
-                            );
-                          }}
-                          style={{
-                            padding: "10px",
-                            cursor: "pointer",
-                            borderBottom:
-                              "1px solid #eee",
-                            background:
-                              Number(
-                                formulario.id_estudiante
-                              ) ===
-                              Number(
+                          return (
+                            nombre.includes(texto) ||
+                            documento.includes(texto)
+                          );
+                        })
+                        .slice(0, 20)
+                        .map((estudiante) => (
+                          <div
+                            key={estudiante.id_estudiante}
+                            onClick={() => {
+                              setFormulario({
+                                ...formulario,
+                                id_estudiante:
+                                  estudiante.id_estudiante,
+                              });
+
+                              setBusquedaEstudiante(
+                                estudiante.nombres +
+                                  " - " +
+                                  estudiante.documento +
+                                  " - " +
+                                  estudiante.grado
+                              );
+
+                              consultarLlegadasEstudiante(
                                 estudiante.id_estudiante
-                              )
-                                ? "#f0f0f0"
-                                : "white",
-                          }}
-                        >
-                          {estudiante.nombres} -{" "}
-                          {estudiante.grado}
+                              );
+                            }}
+                            style={{
+                              padding: "10px",
+                              cursor: "pointer",
+                              borderBottom: "1px solid #eee",
+                            }}
+                          >
+                            <strong>{estudiante.nombres}</strong>
+                            <br />
+                            <small className="text-muted">
+                              Documento: {estudiante.documento} | Grado:{" "}
+                              {estudiante.grado}
+                            </small>
+                          </div>
+                        ))}
+
+                      {estudiantes.filter((estudiante) => {
+                        const texto =
+                          busquedaEstudiante.toLowerCase().trim();
+
+                        const nombre =
+                          estudiante.nombres?.toLowerCase() || "";
+
+                        const documento =
+                          String(estudiante.documento || "").toLowerCase();
+
+                        return (
+                          nombre.includes(texto) ||
+                          documento.includes(texto)
+                        );
+                      }).length === 0 && (
+                        <div className="text-center text-muted p-3">
+                          No se encontró ningún estudiante.
                         </div>
-                      ))}
-
-                    {estudiantes.length === 0 && (
-                      <div className="text-center text-muted p-3">
-                        No hay estudiantes disponibles.
-                      </div>
-                    )}
-
-                  </div>
-
+                      )}
+                    </div>
+                  )}
                   {/* ESTUDIANTE SELECCIONADO */}
                   {formulario.id_estudiante && (
                     <div className="alert alert-success py-2">
@@ -453,8 +469,8 @@ function Llegadas() {
                       llegada(s) tarde este mes.
                     </div>
                   )}
-
                   {/* FECHA */}
+                  <label className="form-label fw-bold">Fecha</label>
                   <input
                     className="form-control mb-3"
                     type="date"
@@ -463,11 +479,12 @@ function Llegadas() {
                     onChange={manejarCambio}
                   />
 
-                  {/* OBSERVACION */}
+                  {/* MOTIVO DE LLEGADA TARDE */}
+                  <label className="form-label fw-bold">Motivo de llegada tarde</label>
                   <textarea
                     className="form-control"
                     name="observacion"
-                    placeholder="Observación"
+                    placeholder="Escriba el motivo de la llegada tarde"
                     value={formulario.observacion}
                     onChange={manejarCambio}
                   />
@@ -631,9 +648,12 @@ function Llegadas() {
 
                 <button
                   className="btn btn-outline-primary me-2"
-                  onClick={() =>
-                    setLlegadaEditar(llegada)
-                  }
+                  onClick={() => {
+                    setLlegadaEditar(llegada);
+                    setBusquedaEstudianteEditar(
+                      `${llegada.nombres} - ${llegada.documento} - ${llegada.grado}`
+                    );
+                  }}
                 >
                   <FaEdit />
                 </button>
@@ -683,37 +703,129 @@ function Llegadas() {
 
               <div className="modal-body">
 
-                <select
-                  className="form-control mb-3"
-                  value={
-                    llegadaEditar.id_estudiante
-                  }
-                  onChange={(e) =>
+                {/* BUSCAR ESTUDIANTE PARA EDITAR */}
+                <label className="form-label fw-bold">
+                  Buscar estudiante
+                </label>
+
+                <input
+                  type="text"
+                  className="form-control mb-2"
+                  placeholder="Escriba nombre o documento..."
+                  value={busquedaEstudianteEditar}
+                  onChange={(e) => {
+                    setBusquedaEstudianteEditar(e.target.value);
+
                     setLlegadaEditar({
                       ...llegadaEditar,
-                      id_estudiante:
-                        e.target.value,
-                    })
-                  }
-                >
+                      id_estudiante: "",
+                    });
+                  }}
+                />
 
-                  {estudiantes.map(
-                    (estudiante) => (
-                      <option
-                        key={
-                          estudiante.id_estudiante
-                        }
-                        value={
-                          estudiante.id_estudiante
-                        }
-                      >
-                        {estudiante.nombres} -{" "}
-                        {estudiante.grado}
-                      </option>
-                    )
+                {/* LISTA DE ESTUDIANTES */}
+                {busquedaEstudianteEditar.trim() &&
+                  !llegadaEditar.id_estudiante && (
+                    <div
+                      style={{
+                        maxHeight: "250px",
+                        overflowY: "auto",
+                        border: "1px solid #ddd",
+                        borderRadius: "6px",
+                        marginBottom: "16px",
+                        backgroundColor: "white",
+                      }}
+                    >
+                      {estudiantes
+                        .filter((estudiante) => {
+                          const texto =
+                            busquedaEstudianteEditar
+                              .toLowerCase()
+                              .trim();
+
+                          const nombre =
+                            estudiante.nombres?.toLowerCase() || "";
+
+                          const documento =
+                            String(
+                              estudiante.documento || ""
+                            ).toLowerCase();
+
+                          return (
+                            nombre.includes(texto) ||
+                            documento.includes(texto)
+                          );
+                        })
+                        .slice(0, 20)
+                        .map((estudiante) => (
+                          <div
+                            key={estudiante.id_estudiante}
+                            onClick={() => {
+                              setLlegadaEditar({
+                                ...llegadaEditar,
+                                id_estudiante:
+                                  estudiante.id_estudiante,
+                              });
+
+                              setBusquedaEstudianteEditar(
+                                `${estudiante.nombres} - ${estudiante.documento} - ${estudiante.grado}`
+                              );
+                            }}
+                            style={{
+                              padding: "10px",
+                              cursor: "pointer",
+                              borderBottom: "1px solid #eee",
+                            }}
+                          >
+                            <strong>
+                              {estudiante.nombres}
+                            </strong>
+
+                            <br />
+
+                            <small className="text-muted">
+                              Documento:{" "}
+                              {estudiante.documento} | Grado:{" "}
+                              {estudiante.grado}
+                            </small>
+                          </div>
+                        ))}
+
+                      {estudiantes.filter((estudiante) => {
+                        const texto =
+                          busquedaEstudianteEditar
+                            .toLowerCase()
+                            .trim();
+
+                        const nombre =
+                          estudiante.nombres?.toLowerCase() || "";
+
+                        const documento =
+                          String(
+                            estudiante.documento || ""
+                          ).toLowerCase();
+
+                        return (
+                          nombre.includes(texto) ||
+                          documento.includes(texto)
+                        );
+                      }).length === 0 && (
+                        <div className="text-center text-muted p-3">
+                          No se encontró ningún estudiante.
+                        </div>
+                      )}
+                    </div>
                   )}
 
-                </select>
+                {/* ESTUDIANTE SELECCIONADO */}
+                {llegadaEditar.id_estudiante && (
+                  <div className="alert alert-success py-2">
+                    <strong>
+                      Estudiante seleccionado:
+                    </strong>{" "}
+                    {busquedaEstudianteEditar}
+                  </div>
+                )}
 
                 <input
                   className="form-control mb-3"
@@ -884,3 +996,5 @@ function Llegadas() {
 }
 
 export default Llegadas;
+
+
