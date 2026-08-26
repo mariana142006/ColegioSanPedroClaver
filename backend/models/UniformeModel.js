@@ -21,7 +21,14 @@ const obtenerUniformes = async () => {
         SELECT COUNT(*)
         FROM uniforme u2
         WHERE u2.id_estudiante = u.id_estudiante
-      ) AS total_uniforme
+      ) AS total_uniforme,
+
+      (
+        SELECT COUNT(*)
+        FROM cartas c
+        WHERE c.id_estudiante = u.id_estudiante
+          AND c.tipo = 'uniforme'
+      ) AS carta_generada
 
     FROM uniforme u
 

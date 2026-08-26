@@ -41,31 +41,35 @@ function Uniformes() {
   };
 
   const obtenerAlertas = () => {
-    const conteo = {};
+    const estudiantesAlertas = {};
 
     uniformes.forEach((item) => {
       const id = Number(item.id_estudiante);
 
       if (!id) return;
 
-      if (!conteo[id]) {
-        const estudiante = estudiantes.find((e) => Number(e.id_estudiante) === id);
+      if (!estudiantesAlertas[id]) {
+        const estudiante = estudiantes.find(
+          (e) => Number(e.id_estudiante) === id
+        );
 
-        conteo[id] = {
+        estudiantesAlertas[id] = {
           id_estudiante: id,
           nombres: item.nombres,
+          documento: item.documento,
           grado: item.grado,
-          total_uniforme: 0,
+          total_uniforme: Number(item.total_uniforme) || 0,
+          carta_generada: Number(item.carta_generada) || 0,
           telefono_acudiente: estudiante?.telefono_acudiente || "",
           nombre_acudiente: estudiante?.nombre_acudiente || "",
         };
       }
-
-      conteo[id].total_uniforme++;
     });
 
-    return Object.values(conteo).filter(
-      (item) => item.total_uniforme >= 3
+    return Object.values(estudiantesAlertas).filter(
+      (item) =>
+        item.total_uniforme >= 3 &&
+        item.carta_generada === 0
     );
   };
 
@@ -702,7 +706,10 @@ function Uniformes() {
           tipo="uniforme"
           estudiante={estudianteCarta}
           total={estudianteCarta?.total_uniforme}
-          onCerrar={() => setMostrarCarta(false)}
+          onCerrar={() => {
+            setMostrarCarta(false);
+            cargarUniformes();
+          }}
           onGenerarPDF={() => {}}
         />
       )}
