@@ -22,7 +22,14 @@ const obtenerInasistencias = async () => {
         FROM inasistencias i2
         WHERE i2.id_estudiante = i.id_estudiante
           AND i2.tipo = 'Sin excusa'
-      ) AS total_inasistencias
+      ) AS total_inasistencias,
+
+      (
+        SELECT COUNT(*)
+        FROM cartas c
+        WHERE c.id_estudiante = i.id_estudiante
+          AND c.tipo = 'inasistencia'
+      ) AS total_cartas_inasistencia
 
     FROM inasistencias i
 

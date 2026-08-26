@@ -140,7 +140,9 @@ function Inasistencias() {
     const alertas = inasistencias.filter(
       (item) =>
         item.tipo === "Sin excusa" &&
-        Number(item.total_inasistencias) >= 3
+        Number(item.total_inasistencias) >= 3 &&
+        Math.floor(Number(item.total_inasistencias) / 3) >
+          Number(item.total_cartas_inasistencia || 0)
     );
 
     const estudiantesUnicos = [];
@@ -535,7 +537,10 @@ function Inasistencias() {
           tipo="inasistencia"
           estudiante={estudianteCarta}
           total={estudianteCarta?.total_inasistencias}
-          onCerrar={() => setMostrarCarta(false)}
+          onCerrar={() => {
+            setMostrarCarta(false);
+            cargarInasistencias();
+          }}
           onGenerarPDF={() => {}}
         />
       )}
