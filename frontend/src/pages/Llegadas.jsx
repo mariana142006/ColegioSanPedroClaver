@@ -139,11 +139,14 @@ function Llegadas() {
     } catch (error) {
       console.log(error);
 
-      Swal.fire(
-        "Error",
-        "No se pudo registrar la llegada",
-        "error"
-      );
+      Swal.fire({
+        title: "No se puede registrar",
+        text:
+          error.response?.data?.mensaje ||
+          "No se pudo registrar la llegada",
+        icon: "warning",
+        confirmButtonText: "Aceptar",
+      });
     }
   };
 
@@ -1061,9 +1064,4 @@ function Llegadas() {
 }
 
 export default Llegadas;
-
-
-
-
-
 
