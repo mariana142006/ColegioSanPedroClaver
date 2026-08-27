@@ -18,6 +18,10 @@ function Llegadas() {
   const [totalLlegadas, setTotalLlegadas] = useState(0);
   const [configuracion, setConfiguracion] = useState(null);
 
+
+  const [paginaActual, setPaginaActual] = useState(1);
+
+  const llegadasPorPagina = 10;
   const [formulario, setFormulario] = useState({
     id_estudiante: "",
     fecha: "",
@@ -60,6 +64,21 @@ function Llegadas() {
     }
   };
 
+
+  const totalPaginas = Math.ceil(
+    llegadas.length / llegadasPorPagina,
+  );
+
+  const indiceInicial =
+    (paginaActual - 1) * llegadasPorPagina;
+
+  const indiceFinal =
+    indiceInicial + llegadasPorPagina;
+
+  const llegadasPagina = llegadas.slice(
+    indiceInicial,
+    indiceFinal,
+  );
   useEffect(() => {
     cargarLlegadas();
     cargarEstudiantes();
@@ -592,7 +611,7 @@ function Llegadas() {
 
         <tbody>
 
-          {llegadas.map((llegada) => (
+          {llegadasPagina.map((llegada) => (
             <tr key={llegada.id_llegada}>
 
               <td>{llegada.nombres}</td>
@@ -676,6 +695,44 @@ function Llegadas() {
 
         </tbody>
       </table>
+
+      <div className="d-flex justify-content-between align-items-center mt-3">
+        <div className="text-muted">
+          Mostrando{" "}
+          {llegadas.length === 0 ? 0 : indiceInicial + 1} -{" "}
+          {Math.min(indiceFinal, llegadas.length)} de{" "}
+          {llegadas.length} registros
+        </div>
+
+        <div className="d-flex align-items-center gap-2">
+          <button
+            className="btn btn-outline-secondary"
+            disabled={paginaActual === 1}
+            onClick={() =>
+              setPaginaActual((pagina) => pagina - 1)
+            }
+          >
+            Anterior
+          </button>
+
+          <span className="fw-bold">
+            Página {paginaActual} de {totalPaginas || 1}
+          </span>
+
+          <button
+            className="btn btn-outline-primary"
+            disabled={
+              paginaActual === totalPaginas ||
+              totalPaginas === 0
+            }
+            onClick={() =>
+              setPaginaActual((pagina) => pagina + 1)
+            }
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
 
       {/* ==========================================
           MODAL EDITAR
@@ -827,6 +884,10 @@ function Llegadas() {
                   </div>
                 )}
 
+                <label className="form-label fw-bold">Fecha</label>
+
+
+
                 <input
                   className="form-control mb-3"
                   type="date"
@@ -844,6 +905,10 @@ function Llegadas() {
                     })
                   }
                 />
+
+                <label className="form-label fw-bold">Motivo de llegada tarde</label>
+
+
 
                 <textarea
                   className="form-control"
@@ -996,5 +1061,9 @@ function Llegadas() {
 }
 
 export default Llegadas;
+
+
+
+
 
 
