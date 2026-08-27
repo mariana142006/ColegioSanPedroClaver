@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import api from "../services/api";
 import Swal from "sweetalert2";
 import { FaEdit, FaTrash } from "react-icons/fa";
@@ -7,12 +7,17 @@ import CartaReporte from "../components/CartaReporte";
 
 function Uniformes() {
   const [uniformes, setUniformes] = useState([]);
+
+  const [paginaActual, setPaginaActual] = useState(1);
+
+  const uniformesPorPagina = 10;
   const [reportesVer, setReportesVer] = useState(null);
   const [mostrarCarta, setMostrarCarta] = useState(false);
   const [estudianteCarta, setEstudianteCarta] = useState(null);
 
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [uniformeEditar, setUniformeEditar] = useState(null);
+  const [busquedaEstudianteEditar, setBusquedaEstudianteEditar] = useState("");
   const [estudiantes, setEstudiantes] = useState([]);
   const [busquedaEstudiante, setBusquedaEstudiante] = useState("");
 
@@ -21,6 +26,21 @@ function Uniformes() {
     fecha: "",
     motivo: "",
   });
+
+  const totalPaginas = Math.ceil(
+    uniformes.length / uniformesPorPagina,
+  );
+
+  const indiceInicial =
+    (paginaActual - 1) * uniformesPorPagina;
+
+  const indiceFinal =
+    indiceInicial + uniformesPorPagina;
+
+  const uniformesPagina = uniformes.slice(
+    indiceInicial,
+    indiceFinal,
+  );
 
   const cargarUniformes = async () => {
     try {
@@ -268,7 +288,7 @@ function Uniformes() {
 
         {obtenerAlertas().length > 0 && (
           <div className="alert alert-danger">
-            <h5>⚠️ Alertas de uniforme</h5>
+            <h5>Alertas de uniforme</h5>
 
             <div className="row">
               {obtenerAlertas().map((item) => (
@@ -327,7 +347,7 @@ function Uniformes() {
           </thead>
 
           <tbody>
-            {uniformes.map((item) => (
+            {uniformesPagina.map((item) => (
               <tr key={item.id_uniforme}>
                 <td>{item.nombres}</td>
                 <td>{item.documento}</td>
@@ -358,7 +378,23 @@ function Uniformes() {
                 <td>
                   <button
                     className="btn btn-outline-primary me-2"
-                    onClick={() => setUniformeEditar(item)}
+                    onClick={() => {
+                      setUniformeEditar(item);
+
+                      const estudianteActual = estudiantes.find(
+                        (estudiante) =>
+                          String(estudiante.id_estudiante) ===
+                          String(item.id_estudiante)
+                      );
+
+                      if (estudianteActual) {
+                        setBusquedaEstudianteEditar(
+                          `${estudianteActual.nombres} - ${estudianteActual.documento} - ${estudianteActual.grado}`
+                        );
+                      } else {
+                        setBusquedaEstudianteEditar("");
+                      }
+                    }}
                   >
                     <FaEdit />
                   </button>
@@ -376,6 +412,44 @@ function Uniformes() {
             ))}
           </tbody>
         </table>
+
+        <div className="d-flex justify-content-between align-items-center mt-3">
+          <div className="text-muted">
+            Mostrando{" "}
+            {uniformes.length === 0 ? 0 : indiceInicial + 1} -{" "}
+            {Math.min(indiceFinal, uniformes.length)} de{" "}
+            {uniformes.length} registros
+          </div>
+
+          <div className="d-flex align-items-center gap-2">
+            <button
+              className="btn btn-outline-secondary"
+              disabled={paginaActual === 1}
+              onClick={() =>
+                setPaginaActual((pagina) => pagina - 1)
+              }
+            >
+              Anterior
+            </button>
+
+            <span className="fw-bold">
+              Página {paginaActual} de {totalPaginas || 1}
+            </span>
+
+            <button
+              className="btn btn-outline-primary"
+              disabled={
+                paginaActual === totalPaginas ||
+                totalPaginas === 0
+              }
+              onClick={() =>
+                setPaginaActual((pagina) => pagina + 1)
+              }
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
       </div>
 
       {mostrarFormulario && (
@@ -487,33 +561,14 @@ function Uniformes() {
                   <label className="form-label fw-bold">
                     Falta de uniforme
                   </label>
-
-                  <select
+                  <input
+                    type="text"
                     className="form-control mb-3"
                     name="motivo"
+                    placeholder="Escriba la falta de uniforme"
                     value={formulario.motivo}
                     onChange={manejarCambio}
-                  >
-                    <option value="">
-                      Seleccione la falta de uniforme
-                    </option>
-
-                    <option value="Camisa incorrecta">
-                      Camisa incorrecta
-                    </option>
-
-                    <option value="Zapatos incorrectos">
-                      Zapatos incorrectos
-                    </option>
-
-                    <option value="Medias incorrectas">
-                      Medias incorrectas
-                    </option>
-
-                    <option value="Falta de correa">
-                      Falta de correa
-                    </option>
-                  </select>
+                  />
                 </div>
 
                 <div className="modal-footer">
@@ -555,26 +610,133 @@ function Uniformes() {
                 ></button>
               </div>
 
-              <div className="modal-body">
-                <select
-                  className="form-control mb-3"
-                  value={uniformeEditar.id_estudiante}
-                  onChange={(e) =>
+                            <div className="modal-body">
+
+                <label className="form-label fw-bold">
+                  Buscar estudiante
+                </label>
+
+                <input
+                  type="text"
+                  className="form-control mb-2"
+                  placeholder="Escriba nombre o documento..."
+                  value={busquedaEstudianteEditar}
+                  onChange={(e) => {
+                    const valor = e.target.value;
+
+                    setBusquedaEstudianteEditar(valor);
+
                     setUniformeEditar({
                       ...uniformeEditar,
-                      id_estudiante: e.target.value,
-                    })
-                  }
-                >
-                  {estudiantes.map((estudiante) => (
-                    <option
-                      key={estudiante.id_estudiante}
-                      value={estudiante.id_estudiante}
+                      id_estudiante: "",
+                    });
+                  }}
+                />
+
+                {busquedaEstudianteEditar.trim() &&
+                  !uniformeEditar.id_estudiante && (
+                    <div
+                      style={{
+                        maxHeight: "250px",
+                        overflowY: "auto",
+                        border: "1px solid #ddd",
+                        borderRadius: "6px",
+                        marginBottom: "16px",
+                        backgroundColor: "white",
+                      }}
                     >
-                      {estudiante.nombres} - {estudiante.grado}
-                    </option>
-                  ))}
-                </select>
+                      {estudiantes
+                        .filter((estudiante) => {
+                          const texto =
+                            busquedaEstudianteEditar
+                              .toLowerCase()
+                              .trim();
+
+                          const nombre =
+                            estudiante.nombres?.toLowerCase() || "";
+
+                          const documento =
+                            String(
+                              estudiante.documento || ""
+                            ).toLowerCase();
+
+                          return (
+                            nombre.includes(texto) ||
+                            documento.includes(texto)
+                          );
+                        })
+                        .slice(0, 20)
+                        .map((estudiante) => (
+                          <div
+                            key={estudiante.id_estudiante}
+                            onClick={() => {
+                              setUniformeEditar({
+                                ...uniformeEditar,
+                                id_estudiante:
+                                  estudiante.id_estudiante,
+                              });
+
+                              setBusquedaEstudianteEditar(
+                                `${estudiante.nombres} - ${estudiante.documento} - ${estudiante.grado}`
+                              );
+                            }}
+                            style={{
+                              padding: "10px",
+                              cursor: "pointer",
+                              borderBottom: "1px solid #eee",
+                            }}
+                          >
+                            <strong>
+                              {estudiante.nombres}
+                            </strong>
+
+                            <br />
+
+                            <small className="text-muted">
+                              Documento: {estudiante.documento} | Grado:{" "}
+                              {estudiante.grado}
+                            </small>
+                          </div>
+                        ))}
+
+                      {estudiantes.filter((estudiante) => {
+                        const texto =
+                          busquedaEstudianteEditar
+                            .toLowerCase()
+                            .trim();
+
+                        const nombre =
+                          estudiante.nombres?.toLowerCase() || "";
+
+                        const documento =
+                          String(
+                            estudiante.documento || ""
+                          ).toLowerCase();
+
+                        return (
+                          nombre.includes(texto) ||
+                          documento.includes(texto)
+                        );
+                      }).length === 0 && (
+                        <div className="text-center text-muted p-3">
+                          No se encontró ningún estudiante.
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                {uniformeEditar.id_estudiante && (
+                  <div className="alert alert-success py-2">
+                    <strong>
+                      Estudiante seleccionado:
+                    </strong>{" "}
+                    {busquedaEstudianteEditar}
+                  </div>
+                )}
+
+                <label className="form-label fw-bold">
+                  Fecha
+                </label>
 
                 <input
                   className="form-control mb-3"
@@ -591,6 +753,10 @@ function Uniformes() {
                     })
                   }
                 />
+
+                <label className="form-label fw-bold">
+                  Falta de uniforme
+                </label>
 
                 <select
                   className="form-control mb-3"
@@ -618,9 +784,9 @@ function Uniformes() {
                     Falta de correa
                   </option>
                 </select>
-              </div>
 
-              <div className="modal-footer">
+              </div>
+<div className="modal-footer">
                 <button
                   className="btn btn-secondary"
                   onClick={() => setUniformeEditar(null)}
@@ -718,3 +884,19 @@ function Uniformes() {
 }
 
 export default Uniformes;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
