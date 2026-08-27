@@ -758,8 +758,10 @@ function Uniformes() {
                   Falta de uniforme
                 </label>
 
-                <select
+                <input
+                  type="text"
                   className="form-control mb-3"
+                  placeholder="Escriba la falta de uniforme"
                   value={uniformeEditar.motivo}
                   onChange={(e) =>
                     setUniformeEditar({
@@ -767,23 +769,7 @@ function Uniformes() {
                       motivo: e.target.value,
                     })
                   }
-                >
-                  <option value="Camisa incorrecta">
-                    Camisa incorrecta
-                  </option>
-
-                  <option value="Zapatos incorrectos">
-                    Zapatos incorrectos
-                  </option>
-
-                  <option value="Medias incorrectas">
-                    Medias incorrectas
-                  </option>
-
-                  <option value="Falta de correa">
-                    Falta de correa
-                  </option>
-                </select>
+                />
 
               </div>
 <div className="modal-footer">
@@ -884,6 +870,7 @@ function Uniformes() {
 }
 
 export default Uniformes;
+
 
 
 
