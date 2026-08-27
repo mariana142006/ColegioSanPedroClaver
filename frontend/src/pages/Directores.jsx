@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import api from "../services/api";
 import Swal from "sweetalert2";
 import { FaEdit, FaPowerOff } from "react-icons/fa";
@@ -174,20 +174,20 @@ function Directores() {
     const resultado = await Swal.fire({
       title:
         nuevoEstado === "Inactivo"
-          ? "¿Desactivar director?"
-          : "¿Activar director?",
+          ? "Â¿Desactivar director?"
+          : "Â¿Activar director?",
 
       text:
         nuevoEstado === "Inactivo"
-          ? `El director ${director.nombre_director} quedará inactivo. Su historial se conservará.`
-          : `El director ${director.nombre_director} volverá a estar activo.`,
+          ? `El director ${director.nombre_director} quedarÃ¡ inactivo. Su historial se conservarÃ¡.`
+          : `El director ${director.nombre_director} volverÃ¡ a estar activo.`,
 
       icon: "warning",
 
       showCancelButton: true,
 
       confirmButtonText:
-        nuevoEstado === "Inactivo" ? "Sí, desactivar" : "Sí, activar",
+        nuevoEstado === "Inactivo" ? "SÃ­, desactivar" : "SÃ­, activar",
 
       cancelButtonText: "Cancelar",
 
@@ -202,8 +202,7 @@ function Directores() {
       await api.put(`/directores/${director.id_director}`, {
         nombre_director: director.nombre_director,
         grupo: director.grupo,
-        total_estudiantes: director.total_estudiantes,
-        estado: nuevoEstado,
+estado: nuevoEstado,
       });
 
       Swal.fire({
@@ -214,8 +213,8 @@ function Directores() {
 
         text:
           nuevoEstado === "Inactivo"
-            ? "El director quedó inactivo y su información fue conservada."
-            : "El director volvió a estar activo.",
+            ? "El director quedÃ³ inactivo y su informaciÃ³n fue conservada."
+            : "El director volviÃ³ a estar activo.",
 
         icon: "success",
 
@@ -266,11 +265,11 @@ function Directores() {
         <h2 className="fw-bold">Directores de grupo</h2>
 
         <p className="text-muted">
-          Administración de directores y grupos del colegio
+          AdministraciÃ³n de directores y grupos del colegio
         </p>
       </div>
 
-      {/* BOTÓN */}
+      {/* BOTÃ“N */}
 
       <button className="btn btn-naranja mb-3" onClick={nuevoDirector}>
         + Agregar director
@@ -483,3 +482,5 @@ function Directores() {
 }
 
 export default Directores;
+
+

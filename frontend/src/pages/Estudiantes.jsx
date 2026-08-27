@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import api from "../services/api";
 import "../styles/usuarios.css";
 
@@ -8,19 +8,14 @@ import { FaEdit, FaTrash, FaCheck } from "react-icons/fa";
 
 function Estudiantes() {
   const [estudiantes, setEstudiantes] = useState([]);
-
   const [directores, setDirectores] = useState([]);
-
   const [busqueda, setBusqueda] = useState("");
-
   const [filtroEstado, setFiltroEstado] = useState("Todos");
-
   const [paginaActual, setPaginaActual] = useState(1);
 
   const estudiantesPorPagina = 10;
 
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-
   const [estudianteEditar, setEstudianteEditar] = useState(null);
 
   const [formulario, setFormulario] = useState({
@@ -36,7 +31,6 @@ function Estudiantes() {
   const cargarEstudiantes = async () => {
     try {
       const respuesta = await api.get("/estudiantes");
-
       setEstudiantes(respuesta.data);
     } catch (error) {
       console.log(error);
@@ -47,7 +41,11 @@ function Estudiantes() {
     try {
       const respuesta = await api.get("/directores");
 
-      setDirectores(respuesta.data);
+      const directoresActivos = respuesta.data.filter(
+        (director) => director.estado === "Activo"
+      );
+
+      setDirectores(directoresActivos);
     } catch (error) {
       console.log(error);
     }
@@ -64,7 +62,9 @@ function Estudiantes() {
       setFormulario({
         ...formulario,
         grado: value,
-        id_director: directorEncontrado ? directorEncontrado.id_director : "",
+        id_director: directorEncontrado
+          ? directorEncontrado.id_director
+          : "",
       });
 
       return;
@@ -150,11 +150,8 @@ function Estudiantes() {
 
       Swal.fire({
         title: "¡Actualizado!",
-
         text: "El estudiante fue actualizado correctamente.",
-
         icon: "success",
-
         confirmButtonText: "Aceptar",
       });
 
@@ -278,7 +275,6 @@ function Estudiantes() {
   );
 
   const indiceInicial = (paginaActual - 1) * estudiantesPorPagina;
-
   const indiceFinal = indiceInicial + estudiantesPorPagina;
 
   const estudiantesPagina = estudiantesFiltrados.slice(
@@ -320,6 +316,7 @@ function Estudiantes() {
         >
           + Nuevo Estudiante
         </button>
+
         {mostrarFormulario && (
           <div className="modal d-block bg-dark bg-opacity-50">
             <div className="modal-dialog">
@@ -418,19 +415,23 @@ function Estudiantes() {
             style={{ width: "300px" }}
             placeholder="Buscar estudiante..."
             value={busqueda}
-            onChange={(e) => {setBusqueda(e.target.value); setPaginaActual(1);}}
+            onChange={(e) => {
+              setBusqueda(e.target.value);
+              setPaginaActual(1);
+            }}
           />
 
           <select
             className="form-control"
             style={{ width: "200px" }}
             value={filtroEstado}
-            onChange={(e) => {setFiltroEstado(e.target.value); setPaginaActual(1);}}
+            onChange={(e) => {
+              setFiltroEstado(e.target.value);
+              setPaginaActual(1);
+            }}
           >
             <option value="Todos">Todos</option>
-
             <option value="Activo">Activos</option>
-
             <option value="Inactivo">Inactivos</option>
           </select>
         </div>
@@ -528,7 +529,9 @@ function Estudiantes() {
 
             <button
               className="btn btn-outline-primary"
-              disabled={paginaActual === totalPaginas || totalPaginas === 0}
+              disabled={
+                paginaActual === totalPaginas || totalPaginas === 0
+              }
               onClick={() => setPaginaActual((pagina) => pagina + 1)}
             >
               Siguiente
@@ -536,6 +539,7 @@ function Estudiantes() {
           </div>
         </div>
       </div>
+
       {estudianteEditar && (
         <div className="modal d-block bg-dark bg-opacity-50">
           <div className="modal-dialog">
@@ -645,7 +649,6 @@ function Estudiantes() {
                   }
                 >
                   <option>Activo</option>
-
                   <option>Inactivo</option>
                 </select>
               </div>
@@ -658,7 +661,10 @@ function Estudiantes() {
                   Cancelar
                 </button>
 
-                <button className="btn btn-primary" onClick={guardarEdicion}>
+                <button
+                  className="btn btn-primary"
+                  onClick={guardarEdicion}
+                >
                   Guardar cambios
                 </button>
               </div>
