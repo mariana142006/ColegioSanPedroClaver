@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 
 import api from "../services/api";
 
@@ -23,6 +23,10 @@ function Inasistencias() {
 
   const [busquedaEstudiante, setBusquedaEstudiante] = useState("");
 
+  const [paginaActual, setPaginaActual] = useState(1);
+
+  const inasistenciasPorPagina = 10;
+
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
   const [formulario, setFormulario] = useState({
@@ -36,6 +40,21 @@ function Inasistencias() {
   const [editar, setEditar] = useState(false);
 
   const [idEditar, setIdEditar] = useState(null);
+
+  const totalPaginas = Math.ceil(
+    inasistencias.length / inasistenciasPorPagina
+  );
+
+  const indiceInicial =
+    (paginaActual - 1) * inasistenciasPorPagina;
+
+  const indiceFinal =
+    indiceInicial + inasistenciasPorPagina;
+
+  const inasistenciasPagina = inasistencias.slice(
+    indiceInicial,
+    indiceFinal
+  );
 
   const cargarInasistencias = async () => {
     try {
@@ -99,12 +118,27 @@ function Inasistencias() {
   };
 
   const editarInasistencia = (item) => {
+    const estudiante = estudiantes.find(
+      (e) =>
+        Number(e.id_estudiante) ===
+        Number(item.id_estudiante)
+    );
+
     setFormulario({
       id_estudiante: item.id_estudiante,
-      fecha: item.fecha.substring(0, 10),
-      tipo: item.tipo,
+      fecha: item.fecha
+        ? String(item.fecha).substring(0, 10)
+        : "",
+      tipo: item.tipo || "",
       observacion: item.observacion || "",
+      estado: item.estado || "Normal",
     });
+
+    setBusquedaEstudiante(
+      estudiante
+        ? `${estudiante.nombres} - ${estudiante.documento} - ${estudiante.grado}`
+        : item.nombres || ""
+    );
 
     setIdEditar(item.id_inasistencia);
 
@@ -112,7 +146,6 @@ function Inasistencias() {
 
     setMostrarFormulario(true);
   };
-
   useEffect(() => {
     cargarInasistencias();
 
@@ -175,7 +208,7 @@ function Inasistencias() {
   const notificarAcudienteWhatsApp = (item) => {
     if (!item.telefono_acudiente) {
       Swal.fire(
-        "Sin teléfono",
+        "Sin telefono",
         "Este estudiante no tiene registrado un número de acudiente.",
         "warning"
       );
@@ -185,7 +218,7 @@ function Inasistencias() {
     let telefono = String(item.telefono_acudiente)
       .replace(/\D/g, "");
 
-    // Número celular colombiano de 10 dígitos
+    // Numero celular colombiano de 10 digitos
     if (telefono.length === 10 && telefono.startsWith("3")) {
       telefono = "57" + telefono;
     }
@@ -195,7 +228,7 @@ function Inasistencias() {
       `Nos permitimos informarle que el estudiante ${item.nombres}, ` +
       `del grado ${item.grado}, ha acumulado ${item.total_inasistencias} ` +
       `inasistencias. ` +
-      `Agradecemos su atención y acompañamiento para fortalecer ` +
+      `Agradecemos su atencion y acompanamiento para fortalecer ` +
       `la asistencia del estudiante al Colegio San Pedro Claver.`;
 
     const url =
@@ -217,7 +250,7 @@ function Inasistencias() {
 
       {obtenerAlertas().length > 0 && (
         <div className="alert alert-danger">
-          <h5>⚠️ Alertas de inasistencias</h5>
+          <h5>Alertas de inasistencias</h5>
 
           <div className="alertas-container">
             {obtenerAlertas().map((item) => (
@@ -277,7 +310,7 @@ function Inasistencias() {
         </thead>
 
         <tbody>
-          {inasistencias.map((item) => (
+          {inasistenciasPagina.map((item) => (
             <tr key={item.id_inasistencia}>
               <td>{item.nombres}</td>
 
@@ -329,28 +362,77 @@ function Inasistencias() {
         </tbody>
       </table>
 
+      <div className="d-flex justify-content-between align-items-center mt-3">
+        <div className="text-muted">
+          Mostrando{" "}
+          {inasistencias.length === 0 ? 0 : indiceInicial + 1} -{" "}
+          {Math.min(indiceFinal, inasistencias.length)} de{" "}
+          {inasistencias.length} registros
+        </div>
+
+        <div className="d-flex align-items-center gap-2">
+          <button
+            className="btn btn-outline-secondary"
+            disabled={paginaActual === 1}
+            onClick={() => setPaginaActual((pagina) => pagina - 1)}
+          >
+            Anterior
+          </button>
+
+          <span className="fw-bold">
+            Página {paginaActual} de {totalPaginas || 1}
+          </span>
+
+          <button
+            className="btn btn-outline-primary"
+            disabled={paginaActual === totalPaginas || totalPaginas === 0}
+            onClick={() => setPaginaActual((pagina) => pagina + 1)}
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
+
+
       {mostrarFormulario && (
         <div className="modal d-block bg-dark bg-opacity-50">
           <div className="modal-dialog">
             <div className="modal-content">
+
               <div className="modal-header">
-                <h5>{editar ? "Editar inasistencia" : "Nueva inasistencia"}</h5>
+                <h5>
+                  {editar
+                    ? "Editar inasistencia"
+                    : "Nueva inasistencia"}
+                </h5>
 
                 <button
                   className="btn-close"
-                  onClick={() => setMostrarFormulario(false)}
+                  onClick={() => {
+                    setMostrarFormulario(false);
+                    setEditar(false);
+                    setIdEditar(null);
+                  }}
                 ></button>
               </div>
 
               <form onSubmit={guardarInasistencia}>
+
                 <div className="modal-body">
+
+                  {/* BUSCAR ESTUDIANTE */}
+                  <label className="form-label fw-bold">
+                    Buscar estudiante
+                  </label>
+
                   <input
                     type="text"
                     className="form-control mb-2"
-                    placeholder="🔎 Buscar estudiante por nombre..."
+                    placeholder="Escriba nombre o documento..."
                     value={busquedaEstudiante}
                     onChange={(e) => {
                       setBusquedaEstudiante(e.target.value);
+
                       setFormulario({
                         ...formulario,
                         id_estudiante: "",
@@ -358,63 +440,140 @@ function Inasistencias() {
                     }}
                   />
 
-                  <div
-                    style={{
-                      maxHeight: "300px",
-                      overflowY:
-                        estudiantes.filter((estudiante) =>
-                          estudiante.nombres
-                            ?.toLowerCase()
-                            .includes(busquedaEstudiante.toLowerCase())
-                        ).length > 8
-                          ? "auto"
-                          : "hidden",
-                      border: "1px solid #ddd",
-                      borderRadius: "6px",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    {estudiantes
-                      .filter((estudiante) =>
-                        estudiante.nombres
-                          ?.toLowerCase()
-                          .includes(busquedaEstudiante.toLowerCase())
-                      )
-                      .slice(0, 20)
-                      .map((estudiante) => (
-                        <div
-                          key={estudiante.id_estudiante}
-                          onClick={() => {
-                            setFormulario({
-                              ...formulario,
-                              id_estudiante: estudiante.id_estudiante,
-                            });
+                  {busquedaEstudiante.trim() !== "" &&
+                    !formulario.id_estudiante && (
+                      <div
+                        style={{
+                          maxHeight: "300px",
+                          overflowY:
+                            estudiantes.filter((estudiante) => {
+                              const texto =
+                                busquedaEstudiante
+                                  .toLowerCase()
+                                  .trim();
 
-                            setBusquedaEstudiante(
-                              `${estudiante.nombres} - ${estudiante.grado}`
+                              const nombre =
+                                estudiante.nombres
+                                  ?.toLowerCase() || "";
+
+                              const documento =
+                                String(
+                                  estudiante.documento || ""
+                                ).toLowerCase();
+
+                              return (
+                                nombre.includes(texto) ||
+                                documento.includes(texto)
+                              );
+                            }).length > 8
+                              ? "auto"
+                              : "hidden",
+                          border: "1px solid #ddd",
+                          borderRadius: "6px",
+                          marginBottom: "16px",
+                        }}
+                      >
+
+                        {estudiantes
+                          .filter((estudiante) => {
+                            const texto =
+                              busquedaEstudiante
+                                .toLowerCase()
+                                .trim();
+
+                            const nombre =
+                              estudiante.nombres
+                                ?.toLowerCase() || "";
+
+                            const documento =
+                              String(
+                                estudiante.documento || ""
+                              ).toLowerCase();
+
+                            return (
+                              nombre.includes(texto) ||
+                              documento.includes(texto)
                             );
-                          }}
-                          style={{
-                            padding: "10px",
-                            cursor: "pointer",
-                            borderBottom: "1px solid #eee",
-                            background:
-                              Number(formulario.id_estudiante) ===
-                              Number(estudiante.id_estudiante)
-                                ? "#f0f0f0"
-                                : "white",
-                          }}
-                        >
-                          {estudiante.nombres} - {estudiante.grado}
-                        </div>
-                      ))}
+                          })
+                          .slice(0, 20)
+                          .map((estudiante) => (
+                            <div
+                              key={estudiante.id_estudiante}
+                              onClick={() => {
+                                setFormulario({
+                                  ...formulario,
+                                  id_estudiante:
+                                    estudiante.id_estudiante,
+                                });
 
-                    {estudiantes.length === 0 && (
-                      <div className="text-center text-muted p-3">
-                        No hay estudiantes disponibles.
+                                setBusquedaEstudiante(
+                                  `${estudiante.nombres} - ${estudiante.documento} - ${estudiante.grado}`
+                                );
+                              }}
+                              style={{
+                                padding: "10px",
+                                cursor: "pointer",
+                                borderBottom:
+                                  "1px solid #eee",
+                              }}
+                            >
+                              <strong>
+                                {estudiante.nombres}
+                              </strong>
+
+                              <br />
+
+                              <small className="text-muted">
+                                Documento:{" "}
+                                {estudiante.documento}{" "}
+                                | Grado:{" "}
+                                {estudiante.grado}
+                              </small>
+                            </div>
+                          ))}
+
+                        {estudiantes.filter((estudiante) => {
+                          const texto =
+                            busquedaEstudiante
+                              .toLowerCase()
+                              .trim();
+
+                          const nombre =
+                            estudiante.nombres
+                              ?.toLowerCase() || "";
+
+                          const documento =
+                            String(
+                              estudiante.documento || ""
+                            ).toLowerCase();
+
+                          return (
+                            nombre.includes(texto) ||
+                            documento.includes(texto)
+                          );
+                        }).length === 0 && (
+                          <div className="text-center text-muted p-3">
+                            No se encontró ningún estudiante.
+                          </div>
+                        )}
+
                       </div>
                     )}
-                  </div>
+
+                  {/* ESTUDIANTE SELECCIONADO */}
+                  {formulario.id_estudiante && (
+                    <div className="alert alert-success py-2">
+                      <strong>
+                        Estudiante seleccionado:
+                      </strong>{" "}
+                      {busquedaEstudiante}
+                    </div>
+                  )}
+
+                  {/* FECHA */}
+                  <label className="form-label fw-bold">
+                    Fecha
+                  </label>
 
                   <input
                     className="form-control mb-3"
@@ -424,51 +583,85 @@ function Inasistencias() {
                     onChange={manejarCambio}
                   />
 
+                  {/* MOTIVO DE INASISTENCIA */}
+                  <label className="form-label fw-bold">
+                    Motivo de inasistencia
+                  </label>
+
                   <select
                     className="form-control mb-3"
                     name="tipo"
                     value={formulario.tipo}
                     onChange={manejarCambio}
                   >
-                    <option value="">Seleccione tipo</option>
+                    <option value="">
+                      Seleccione motivo de inasistencia
+                    </option>
 
-                    <option>Con excusa</option>
+                    <option value="Con excusa">
+                      Con excusa
+                    </option>
 
-                    <option>Sin excusa</option>
+                    <option value="Sin excusa">
+                      Sin excusa
+                    </option>
 
-                    <option>Incapacidad</option>
+                    <option value="Incapacidad">
+                      Incapacidad
+                    </option>
 
-                    <option>Permiso</option>
+                    <option value="Permiso">
+                      Permiso
+                    </option>
                   </select>
+
+                  {/* DESCRIPCIÓN */}
+                  <label className="form-label fw-bold">
+                    Descripción
+                  </label>
 
                   <textarea
                     className="form-control mb-3"
                     name="observacion"
-                    placeholder="Observación"
+                    placeholder="Escriba una descripción..."
                     value={formulario.observacion}
                     onChange={manejarCambio}
+                    rows="3"
                   />
+
                 </div>
 
                 <div className="modal-footer">
+
                   <button
                     type="button"
                     className="btn btn-secondary"
-                    onClick={() => setMostrarFormulario(false)}
+                    onClick={() => {
+                      setMostrarFormulario(false);
+                      setEditar(false);
+                      setIdEditar(null);
+                    }}
                   >
                     Cancelar
                   </button>
 
-                  <button className="btn btn-primary" type="submit">
-                    Guardar
+                  <button
+                    className="btn btn-primary"
+                    type="submit"
+                  >
+                    {editar
+                      ? "Guardar cambios"
+                      : "Guardar"}
                   </button>
+
                 </div>
+
               </form>
+
             </div>
           </div>
         </div>
       )}
-
       {reportesVer && (
         <div className="modal d-block bg-dark bg-opacity-50">
           <div className="modal-dialog">
@@ -523,7 +716,7 @@ function Inasistencias() {
                       setMostrarCarta(true);
                     }}
                   >
-                    📄 Generar carta
+                    Generar carta
                   </button>
                 </div>
               </div>
@@ -549,3 +742,13 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
+
+
+
+
+
+
+
+
+
