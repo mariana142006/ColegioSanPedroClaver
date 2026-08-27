@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 import Swal from "sweetalert2";
 import { FaEdit, FaPowerOff } from "react-icons/fa";
@@ -174,20 +174,20 @@ function Directores() {
     const resultado = await Swal.fire({
       title:
         nuevoEstado === "Inactivo"
-          ? "Â¿Desactivar director?"
-          : "Â¿Activar director?",
+          ? "Desactivar director?"
+          : "Activar director?",
 
       text:
         nuevoEstado === "Inactivo"
-          ? `El director ${director.nombre_director} quedarÃ¡ inactivo. Su historial se conservarÃ¡.`
-          : `El director ${director.nombre_director} volverÃ¡ a estar activo.`,
+          ? "El director quedara inactivo. Su historial se conservara."
+          : "El director volvera a estar activo.",
 
       icon: "warning",
 
       showCancelButton: true,
 
       confirmButtonText:
-        nuevoEstado === "Inactivo" ? "SÃ­, desactivar" : "SÃ­, activar",
+        nuevoEstado === "Inactivo" ? "Si, desactivar" : "Si, activar",
 
       cancelButtonText: "Cancelar",
 
@@ -213,8 +213,8 @@ estado: nuevoEstado,
 
         text:
           nuevoEstado === "Inactivo"
-            ? "El director quedÃ³ inactivo y su informaciÃ³n fue conservada."
-            : "El director volviÃ³ a estar activo.",
+            ? "El director quedo inactivo y su informacion fue conservada."
+            : "El director volvio a estar activo.",
 
         icon: "success",
 
@@ -265,11 +265,11 @@ estado: nuevoEstado,
         <h2 className="fw-bold">Directores de grupo</h2>
 
         <p className="text-muted">
-          AdministraciÃ³n de directores y grupos del colegio
+          Administracion de directores y grupos del colegio
         </p>
       </div>
 
-      {/* BOTÃ“N */}
+      {/* BOTON */}
 
       <button className="btn btn-naranja mb-3" onClick={nuevoDirector}>
         + Agregar director
@@ -457,7 +457,7 @@ estado: nuevoEstado,
                   </div>
                 </div>
 
-                {/* BOTONES */}
+      {/* BOTON */}
 
                 <div className="modal-footer">
                   <button
