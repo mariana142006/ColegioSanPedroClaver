@@ -1,4 +1,4 @@
-const conexion = require("../database/conexion");
+﻿const conexion = require("../database/conexion");
 
 // ==========================================
 // OBTENER TODAS LAS LLEGADAS
@@ -48,7 +48,7 @@ const crearLlegada = async (datos) => {
   } = datos;
 
   // ==========================================
-  // GENERAR HORA REAL - COLOMBIA
+  // OBTENER HORA REAL DE COLOMBIA
   // ==========================================
   const ahora = new Date();
 
@@ -59,6 +59,59 @@ const crearLlegada = async (datos) => {
     second: "2-digit",
     hour12: false,
   }).format(ahora);
+
+  // ==========================================
+  // OBTENER HORA DE ENTRADA CONFIGURADA
+  // ==========================================
+  const [configuracion] = await conexion.query(`
+    SELECT hora_entrada
+    FROM configuracion
+    LIMIT 1
+  `);
+
+  if (
+    configuracion.length === 0 ||
+    !configuracion[0].hora_entrada
+  ) {
+    throw new Error(
+      "No hay una hora de entrada configurada en el sistema"
+    );
+  }
+
+  // ==========================================
+  // CONVERTIR HORAS A SEGUNDOS PARA COMPARAR
+  // ==========================================
+  const horaActualPartes = hora
+    .split(":")
+    .map(Number);
+
+  const horaEntradaTexto = String(
+    configuracion[0].hora_entrada
+  ).substring(0, 8);
+
+  const horaEntradaPartes = horaEntradaTexto
+    .split(":")
+    .map(Number);
+
+  const segundosHoraActual =
+    (horaActualPartes[0] * 3600) +
+    (horaActualPartes[1] * 60) +
+    horaActualPartes[2];
+
+  const segundosHoraEntrada =
+    (horaEntradaPartes[0] * 3600) +
+    (horaEntradaPartes[1] * 60) +
+    horaEntradaPartes[2];
+
+  // ==========================================
+  // VALIDAR SI REALMENTE ES LLEGADA TARDE
+  // ==========================================
+  if (segundosHoraActual <= segundosHoraEntrada) {
+    throw new Error(
+      `No se puede registrar una llegada tarde todavía. ` +
+      `La hora de entrada es ${horaEntradaTexto} y la hora actual es ${hora}.`
+    );
+  }
 
   // ==========================================
   // CONTAR LLEGADAS DEL MISMO MES
@@ -81,9 +134,10 @@ const crearLlegada = async (datos) => {
   // ==========================================
   const generaAlerta = totalMes >= 3 ? 1 : 0;
 
-  const estadoAlerta = generaAlerta === 1
-    ? "Pendiente"
-    : "Atendida";
+  const estadoAlerta =
+    generaAlerta === 1
+      ? "Pendiente"
+      : "Atendida";
 
   // ==========================================
   // INSERTAR LLEGADA
@@ -150,8 +204,11 @@ const actualizarLlegada = async (id, datos) => {
     throw new Error("Llegada tarde no encontrada");
   }
 
-  const estudianteAnterior = anterior[0].id_estudiante;
-  const fechaAnterior = anterior[0].fecha;
+  const estudianteAnterior =
+    anterior[0].id_estudiante;
+
+  const fechaAnterior =
+    anterior[0].fecha;
 
   // ==========================================
   // ACTUALIZAR SIN CAMBIAR LA HORA
@@ -214,8 +271,11 @@ const eliminarLlegada = async (id) => {
     throw new Error("Llegada tarde no encontrada");
   }
 
-  const estudiante = llegada[0].id_estudiante;
-  const fecha = llegada[0].fecha;
+  const estudiante =
+    llegada[0].id_estudiante;
+
+  const fecha =
+    llegada[0].fecha;
 
   // ==========================================
   // ELIMINAR
@@ -251,9 +311,15 @@ const contarLlegadasEstudiante = async (
   let fechaReferencia = fecha;
 
   if (!fechaReferencia) {
-    fechaReferencia = new Date()
-      .toISOString()
-      .substring(0, 10);
+    const ahora = new Date();
+
+    fechaReferencia =
+      new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Bogota",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(ahora);
   }
 
   const [rows] = await conexion.query(
@@ -300,9 +366,10 @@ const actualizarTotalesMes = async (
 
   const alerta = total >= 3 ? 1 : 0;
 
-  const estado = total >= 3
-    ? "Pendiente"
-    : "Atendida";
+  const estado =
+    total >= 3
+      ? "Pendiente"
+      : "Atendida";
 
   // ==========================================
   // ACTUALIZAR REGISTROS DEL MISMO MES
