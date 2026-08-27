@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 import Swal from "sweetalert2";
 import CartaReporte from "../components/CartaReporte";
@@ -12,6 +12,8 @@ function Reportes() {
   const [cartaVer, setCartaVer] = useState(null);
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
+  const [paginaActual, setPaginaActual] = useState(1);
+  const reportesPorPagina = 10;
 
   const cargarCartas = async () => {
     try {
@@ -72,6 +74,21 @@ function Reportes() {
       String(carta.grado || "").toLowerCase().includes(texto)
     );
   });
+
+  const totalPaginas = Math.ceil(
+    cartasFiltradas.length / reportesPorPagina
+  );
+
+  const indiceInicial =
+    (paginaActual - 1) * reportesPorPagina;
+
+  const indiceFinal =
+    indiceInicial + reportesPorPagina;
+
+  const cartasPagina = cartasFiltradas.slice(
+    indiceInicial,
+    indiceFinal
+  );
 
   const generarReporteGeneral = () => {
     const pdf = new jsPDF();
@@ -199,7 +216,10 @@ function Reportes() {
             className="form-control"
             placeholder="Buscar por estudiante, documento o grado..."
             value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
+            onChange={(e) => {
+              setBusqueda(e.target.value);
+              setPaginaActual(1);
+            }}
           />
         </div>
 
@@ -243,7 +263,7 @@ function Reportes() {
             </thead>
 
             <tbody>
-              {cartasFiltradas.map((carta) => (
+              {cartasPagina.map((carta) => (
                 <tr key={carta.id_carta}>
                   <td>
                     <strong>{carta.numero_reporte}</strong>
@@ -310,6 +330,34 @@ function Reportes() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {cartasFiltradas.length > 0 && totalPaginas > 1 && (
+        <div className="d-flex justify-content-center align-items-center gap-3 mt-3">
+          <button
+            className="btn btn-outline-primary"
+            disabled={paginaActual === 1}
+            onClick={() =>
+              setPaginaActual((pagina) => pagina - 1)
+            }
+          >
+            Anterior
+          </button>
+
+          <span className="fw-bold">
+            Pagina {paginaActual} de {totalPaginas}
+          </span>
+
+          <button
+            className="btn btn-outline-primary"
+            disabled={paginaActual === totalPaginas}
+            onClick={() =>
+              setPaginaActual((pagina) => pagina + 1)
+            }
+          >
+            Siguiente
+          </button>
         </div>
       )}
 
