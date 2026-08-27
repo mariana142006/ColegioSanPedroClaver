@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import api from "../services/api";
 import Swal from "sweetalert2";
 
 function Configuracion() {
   const [formulario, setFormulario] = useState({
     nombre_colegio: "",
-    año_lectivo: "",
+    anio_lectivo: "",
     hora_entrada: "",
     rector: "",
     coordinador: "",
@@ -75,9 +75,9 @@ function Configuracion() {
           <input
             className="form-control mb-3"
             type="number"
-            name="año_lectivo"
+            name="anio_lectivo"
             placeholder="Año lectivo"
-            value={formulario.año_lectivo}
+            value={formulario.anio_lectivo}
             onChange={manejarCambio}
           />
 
@@ -131,3 +131,4 @@ function Configuracion() {
 }
 
 export default Configuracion;
+
