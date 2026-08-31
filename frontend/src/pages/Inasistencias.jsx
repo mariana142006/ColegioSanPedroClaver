@@ -22,6 +22,7 @@ function Inasistencias() {
   const [estudiantes, setEstudiantes] = useState([]);
 
   const [busquedaEstudiante, setBusquedaEstudiante] = useState("");
+  const [busquedaInasistencias, setBusquedaInasistencias] = useState("");
 
   const [paginaActual, setPaginaActual] = useState(1);
 
@@ -41,8 +42,31 @@ function Inasistencias() {
 
   const [idEditar, setIdEditar] = useState(null);
 
+  // ==========================================
+  // BUSCADOR DE INASISTENCIAS
+  // Busca por nombre, grado o documento
+  // ==========================================
+  const inasistenciasFiltradas = inasistencias.filter((item) => {
+    const texto = busquedaInasistencias.toLowerCase().trim();
+
+    if (!texto) return true;
+
+    const nombre = String(item.nombres || "").toLowerCase();
+    const grado = String(item.grado || "").toLowerCase();
+    const documento = String(item.documento || "").toLowerCase();
+
+    return (
+      nombre.includes(texto) ||
+      grado.includes(texto) ||
+      documento.includes(texto)
+    );
+  });
+
+  // ==========================================
+  // PAGINACIÓN DE RESULTADOS FILTRADOS
+  // ==========================================
   const totalPaginas = Math.ceil(
-    inasistencias.length / inasistenciasPorPagina
+    inasistenciasFiltradas.length / inasistenciasPorPagina
   );
 
   const indiceInicial =
@@ -51,7 +75,7 @@ function Inasistencias() {
   const indiceFinal =
     indiceInicial + inasistenciasPorPagina;
 
-  const inasistenciasPagina = inasistencias.slice(
+  const inasistenciasPagina = inasistenciasFiltradas.slice(
     indiceInicial,
     indiceFinal
   );
@@ -290,6 +314,25 @@ function Inasistencias() {
         </div>
       )}
 
+      {/* ==========================================
+          BUSCADOR DE INASISTENCIAS
+          ========================================== */}
+      <div className="mb-3">
+        <label className="form-label fw-bold">
+          Buscar estudiante
+        </label>
+
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Buscar por nombre, grado o documento..."
+          value={busquedaInasistencias}
+          onChange={(e) => {
+            setBusquedaInasistencias(e.target.value);
+            setPaginaActual(1);
+          }}
+        />
+      </div>
       <table className="table table-striped">
         <thead>
           <tr>
@@ -365,9 +408,9 @@ function Inasistencias() {
       <div className="d-flex justify-content-between align-items-center mt-3">
         <div className="text-muted">
           Mostrando{" "}
-          {inasistencias.length === 0 ? 0 : indiceInicial + 1} -{" "}
-          {Math.min(indiceFinal, inasistencias.length)} de{" "}
-          {inasistencias.length} registros
+          {inasistenciasFiltradas.length === 0 ? 0 : indiceInicial + 1} -{" "}
+          {Math.min(indiceFinal, inasistenciasFiltradas.length)} de{" "}
+          {inasistenciasFiltradas.length} registros
         </div>
 
         <div className="d-flex align-items-center gap-2">
@@ -742,6 +785,11 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
+
+
+
+
 
 
 

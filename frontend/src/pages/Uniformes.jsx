@@ -20,6 +20,7 @@ function Uniformes() {
   const [busquedaEstudianteEditar, setBusquedaEstudianteEditar] = useState("");
   const [estudiantes, setEstudiantes] = useState([]);
   const [busquedaEstudiante, setBusquedaEstudiante] = useState("");
+  const [busquedaUniformes, setBusquedaUniformes] = useState("");
 
   const [formulario, setFormulario] = useState({
     id_estudiante: "",
@@ -27,8 +28,31 @@ function Uniformes() {
     motivo: "",
   });
 
+  // ==========================================
+  // BUSCADOR DE UNIFORMES
+  // Busca por nombre, grado o documento
+  // ==========================================
+  const uniformesFiltrados = uniformes.filter((item) => {
+    const texto = busquedaUniformes.toLowerCase().trim();
+
+    if (!texto) return true;
+
+    const nombre = String(item.nombres || "").toLowerCase();
+    const grado = String(item.grado || "").toLowerCase();
+    const documento = String(item.documento || "").toLowerCase();
+
+    return (
+      nombre.includes(texto) ||
+      grado.includes(texto) ||
+      documento.includes(texto)
+    );
+  });
+
+  // ==========================================
+  // PAGINACIÓN DE RESULTADOS FILTRADOS
+  // ==========================================
   const totalPaginas = Math.ceil(
-    uniformes.length / uniformesPorPagina,
+    uniformesFiltrados.length / uniformesPorPagina
   );
 
   const indiceInicial =
@@ -37,12 +61,11 @@ function Uniformes() {
   const indiceFinal =
     indiceInicial + uniformesPorPagina;
 
-  const uniformesPagina = uniformes.slice(
+  const uniformesPagina = uniformesFiltrados.slice(
     indiceInicial,
-    indiceFinal,
+    indiceFinal
   );
-
-  const cargarUniformes = async () => {
+const cargarUniformes = async () => {
     try {
       const respuesta = await api.get("/uniformes");
       setUniformes(respuesta.data);
@@ -333,6 +356,25 @@ function Uniformes() {
           </div>
         )}
 
+        {/* ==========================================
+            BUSCADOR PRINCIPAL DE UNIFORMES
+            ========================================== */}
+        <div className="mb-3">
+          <label className="form-label fw-bold">
+            Buscar estudiante
+          </label>
+
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Buscar por nombre, grado o documento..."
+            value={busquedaUniformes}
+            onChange={(e) => {
+              setBusquedaUniformes(e.target.value);
+              setPaginaActual(1);
+            }}
+          />
+        </div>
         <table className="table table-striped">
           <thead>
             <tr>
@@ -416,9 +458,9 @@ function Uniformes() {
         <div className="d-flex justify-content-between align-items-center mt-3">
           <div className="text-muted">
             Mostrando{" "}
-            {uniformes.length === 0 ? 0 : indiceInicial + 1} -{" "}
-            {Math.min(indiceFinal, uniformes.length)} de{" "}
-            {uniformes.length} registros
+            {uniformesFiltrados.length === 0 ? 0 : indiceInicial + 1} -{" "}
+            {Math.min(indiceFinal, uniformesFiltrados.length)} de{" "}
+            {uniformesFiltrados.length} registros
           </div>
 
           <div className="d-flex align-items-center gap-2">
@@ -870,6 +912,10 @@ function Uniformes() {
 }
 
 export default Uniformes;
+
+
+
+
 
 
 

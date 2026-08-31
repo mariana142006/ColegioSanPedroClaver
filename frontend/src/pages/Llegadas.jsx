@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 import "../styles/usuarios.css";
 import Swal from "sweetalert2";
@@ -17,6 +17,7 @@ function Llegadas() {
   const [llegadaEditar, setLlegadaEditar] = useState(null);
   const [totalLlegadas, setTotalLlegadas] = useState(0);
   const [configuracion, setConfiguracion] = useState(null);
+  const [busqueda, setBusqueda] = useState("");
 
 
   const [paginaActual, setPaginaActual] = useState(1);
@@ -65,6 +66,18 @@ function Llegadas() {
   };
 
 
+  const llegadasFiltradas = llegadas.filter((llegada) => {
+    const texto = busqueda.toLowerCase().trim();
+
+    if (!texto) return true;
+
+    return (
+      String(llegada.nombres || "").toLowerCase().includes(texto) ||
+      String(llegada.documento || "").toLowerCase().includes(texto) ||
+      String(llegada.grado || "").toLowerCase().includes(texto)
+    );
+  });
+
   const totalPaginas = Math.ceil(
     llegadas.length / llegadasPorPagina,
   );
@@ -75,7 +88,7 @@ function Llegadas() {
   const indiceFinal =
     indiceInicial + llegadasPorPagina;
 
-  const llegadasPagina = llegadas.slice(
+  const llegadasPagina = llegadasFiltradas.slice(
     indiceInicial,
     indiceFinal,
   );
@@ -597,6 +610,28 @@ function Llegadas() {
       {/* ==========================================
           TABLA
       ========================================== */}
+      <div className="input-group mb-3">
+        <span className="input-group-text">
+          Buscar
+        </span>
+
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Buscar por estudiante, documento o grado..."
+          value={busqueda}
+          onChange={(e) => {
+            setBusqueda(e.target.value);
+            setPaginaActual(1);
+          }}
+        />
+      </div>
+
+      {busqueda.trim() && (
+        <p className="text-muted">
+          Mostrando {llegadasFiltradas.length} de {llegadas.length} registros.
+        </p>
+      )}
       <table className="table table-striped">
 
         <thead>
