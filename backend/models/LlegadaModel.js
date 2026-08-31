@@ -24,13 +24,28 @@ const obtenerLlegadas = async () => {
         FROM cartas c
         WHERE c.id_estudiante = l.id_estudiante
           AND c.tipo = 'llegada'
+          AND c.observacion NOT LIKE 'Notificado por WhatsApp%'
+          AND MONTH(c.fecha_generacion) = MONTH(l.fecha)
+          AND YEAR(c.fecha_generacion) = YEAR(l.fecha)
       ) AS carta_generada,
+
+      (
+        SELECT COUNT(*)
+        FROM cartas c
+        WHERE c.id_estudiante = l.id_estudiante
+          AND c.tipo = 'llegada'
+          AND c.observacion LIKE 'Notificado por WhatsApp%'
+          AND MONTH(c.fecha_generacion) = MONTH(l.fecha)
+          AND YEAR(c.fecha_generacion) = YEAR(l.fecha)
+      ) AS notificado_whatsapp,
 
       (
         SELECT c.observacion
         FROM cartas c
         WHERE c.id_estudiante = l.id_estudiante
           AND c.tipo = 'llegada'
+          AND MONTH(c.fecha_generacion) = MONTH(l.fecha)
+          AND YEAR(c.fecha_generacion) = YEAR(l.fecha)
         ORDER BY c.id_carta DESC
         LIMIT 1
       ) AS ultima_observacion_carta
@@ -441,4 +456,6 @@ module.exports = {
   actualizarTotalesMes,
   marcarAlertaRevisada,
 };
+
+
 

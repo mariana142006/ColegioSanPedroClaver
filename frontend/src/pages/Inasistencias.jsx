@@ -198,8 +198,11 @@ function Inasistencias() {
       (item) =>
         item.tipo === "Sin excusa" &&
         Number(item.total_inasistencias) >= 3 &&
-        Math.floor(Number(item.total_inasistencias) / 3) >
-          Number(item.total_cartas_inasistencia || 0)
+        Math.floor(Number(item.total_inasistencias || 0) / 3) >
+          (
+            Number(item.total_cartas_inasistencia || 0) +
+            Number(item.notificado_whatsapp || 0)
+          )
     );
 
     const estudiantesUnicos = [];
@@ -413,22 +416,30 @@ function Inasistencias() {
               <td>{item.tipo}</td>
 
               <td>{item.observacion}</td>
-
               <td>
-                <span
-                  className={
-                    item.estado === "Alerta"
-                      ? "badge bg-danger"
-                      : item.estado === "Seguimiento"
-                        ? "badge bg-warning"
-                        : "badge bg-success"
-                  }
-                >
-                  {item.estado}
-                </span>
-              </td>
-
-              <td>
+  {Number(item.notificado_whatsapp || 0) > 0 ? (
+    <span className="badge bg-success">
+      Notificado por WhatsApp
+    </span>
+  ) : Number(item.total_cartas_inasistencia || 0) > 0 ? (
+    <span className="badge bg-success">
+      Carta generada
+    </span>
+  ) : Number(item.total_inasistencias || 0) >= 3 ? (
+    <span className="badge bg-danger">
+      Generar carta
+    </span>
+  ) : Number(item.total_inasistencias || 0) === 2 ? (
+    <span className="badge bg-warning text-dark">
+      Seguimiento
+    </span>
+  ) : (
+    <span className="badge bg-success">
+      Normal
+    </span>
+  )}
+</td>
+<td>
                 <button
                   className="btn btn-outline-primary btn-sm me-2"
                   onClick={() => editarInasistencia(item)}
@@ -828,6 +839,10 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
+
+
+
 
 
 

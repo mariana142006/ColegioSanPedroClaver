@@ -260,23 +260,12 @@ function Llegadas() {
     const conteo = {};
 
     llegadas.forEach((item) => {
-      const id = Number(item.id_estudiante);
-
-      if (!id) return;
+      const id = item.id_estudiante;
 
       if (!conteo[id]) {
-        const estudiante = estudiantes.find(
-          (e) => Number(e.id_estudiante) === id
-        );
-
         conteo[id] = {
-          id_estudiante: id,
-          nombres: item.nombres,
-          grado: item.grado,
+          ...item,
           total_llegadas: 0,
-          carta_generada: Number(item.carta_generada || 0),
-          telefono_acudiente: estudiante?.telefono_acudiente || "",
-          nombre_acudiente: estudiante?.nombre_acudiente || "",
         };
       }
 
@@ -285,8 +274,11 @@ function Llegadas() {
 
     return Object.values(conteo).filter(
       (item) =>
-        Math.floor(Number(item.total_llegadas) / 3) >
-        Number(item.carta_generada || 0)
+        Math.floor(Number(item.total_llegadas || 0) / 3) >
+        (
+          Number(item.carta_generada || 0) +
+          Number(item.notificado_whatsapp || 0)
+        )
     );
   };
   // ============================================================
@@ -729,24 +721,29 @@ function Llegadas() {
               </td>
 
               <td>
-
-                {llegada.genero_alerta === 1 ? (
-                  <span className="badge bg-danger">
-                    Generar carta
-                  </span>
-                ) : llegada.total_mes === 2 ? (
-                  <span className="badge bg-warning text-dark">
-                    Seguimiento
-                  </span>
-                ) : (
-                  <span className="badge bg-success">
-                    Normal
-                  </span>
-                )}
-
-              </td>
-
-              <td>
+  {Number(llegada.notificado_whatsapp || 0) > 0 ? (
+    <span className="badge bg-success">
+      Notificado por WhatsApp
+    </span>
+  ) : Number(llegada.carta_generada || 0) > 0 ? (
+    <span className="badge bg-success">
+      Carta generada
+    </span>
+  ) : Number(llegada.total_mes || 0) >= 3 ? (
+    <span className="badge bg-danger">
+      Generar carta
+    </span>
+  ) : Number(llegada.total_mes || 0) === 2 ? (
+    <span className="badge bg-warning text-dark">
+      Seguimiento
+    </span>
+  ) : (
+    <span className="badge bg-success">
+      Normal
+    </span>
+  )}
+</td>
+<td>
 
                 <button
                   className="btn btn-outline-primary me-2"
@@ -1144,6 +1141,12 @@ function Llegadas() {
 }
 
 export default Llegadas;
+
+
+
+
+
+
 
 
 

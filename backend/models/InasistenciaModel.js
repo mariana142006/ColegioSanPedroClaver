@@ -22,6 +22,15 @@ const obtenerInasistencias = async () => {
         FROM inasistencias i2
         WHERE i2.id_estudiante = i.id_estudiante
           AND i2.tipo = 'Sin excusa'
+          AND i2.fecha >= COALESCE(
+            (
+              SELECT MAX(c.fecha_generacion)
+              FROM cartas c
+              WHERE c.id_estudiante = i.id_estudiante
+                AND c.tipo = 'inasistencia'
+            ),
+            '1900-01-01'
+          )
       ) AS total_inasistencias,
 
       (
@@ -29,7 +38,28 @@ const obtenerInasistencias = async () => {
         FROM cartas c
         WHERE c.id_estudiante = i.id_estudiante
           AND c.tipo = 'inasistencia'
+          AND c.observacion NOT LIKE 'Notificado por WhatsApp%'
+          AND c.id_carta = (
+            SELECT MAX(c2.id_carta)
+            FROM cartas c2
+            WHERE c2.id_estudiante = i.id_estudiante
+              AND c2.tipo = 'inasistencia'
+          )
       ) AS total_cartas_inasistencia,
+
+      (
+        SELECT COUNT(*)
+        FROM cartas c
+        WHERE c.id_estudiante = i.id_estudiante
+          AND c.tipo = 'inasistencia'
+          AND c.observacion LIKE 'Notificado por WhatsApp%'
+          AND c.id_carta = (
+            SELECT MAX(c2.id_carta)
+            FROM cartas c2
+            WHERE c2.id_estudiante = i.id_estudiante
+              AND c2.tipo = 'inasistencia'
+          )
+      ) AS notificado_whatsapp,
 
       (
         SELECT c.observacion
@@ -39,7 +69,6 @@ const obtenerInasistencias = async () => {
         ORDER BY c.id_carta DESC
         LIMIT 1
       ) AS ultima_observacion_carta
-
 
     FROM inasistencias i
 
@@ -53,57 +82,36 @@ const obtenerInasistencias = async () => {
 };
 
 // ==========================================
-// CALCULAR ESTADO DEL ESTUDIANTE
+// OBTENER INASISTENCIAS POR ESTUDIANTE
 // ==========================================
-const actualizarEstadoEstudiante = async (id_estudiante) => {
-  const [conteo] = await conexion.query(
+const obtenerInasistenciasPorEstudiante = async (id_estudiante) => {
+  const [rows] = await conexion.query(
     `
-    SELECT COUNT(*) AS total
-    FROM inasistencias
-    WHERE id_estudiante = ?
-      AND tipo = 'Sin excusa'
+    SELECT
+      i.id_inasistencia,
+      i.id_estudiante,
+      i.fecha,
+      i.tipo,
+      i.observacion,
+      i.estado,
+
+      e.nombres,
+      e.documento,
+      e.grado
+
+    FROM inasistencias i
+
+    INNER JOIN estudiantes e
+      ON i.id_estudiante = e.id_estudiante
+
+    WHERE i.id_estudiante = ?
+
+    ORDER BY i.fecha DESC, i.id_inasistencia DESC
     `,
-    [id_estudiante],
+    [id_estudiante]
   );
 
-  const total = Number(conteo[0].total);
-
-  let estado = "Normal";
-
-  if (total >= 3) {
-    estado = "Alerta";
-  } else if (total === 2) {
-    estado = "Seguimiento";
-  }
-
-  // El estado se aplica solamente a las inasistencias
-  // que son "Sin excusa".
-  await conexion.query(
-    `
-    UPDATE inasistencias
-    SET estado = ?
-    WHERE id_estudiante = ?
-      AND tipo = 'Sin excusa'
-    `,
-    [estado, id_estudiante],
-  );
-
-  // Las inasistencias justificadas no deben quedar
-  // con estado de alerta por el conteo de Sin excusa.
-  await conexion.query(
-    `
-    UPDATE inasistencias
-    SET estado = 'Normal'
-    WHERE id_estudiante = ?
-      AND tipo <> 'Sin excusa'
-    `,
-    [id_estudiante],
-  );
-
-  return {
-    total,
-    estado,
-  };
+  return rows;
 };
 
 // ==========================================
@@ -115,6 +123,7 @@ const crearInasistencia = async (datos) => {
     fecha,
     tipo,
     observacion,
+    estado,
   } = datos;
 
   const [resultado] = await conexion.query(
@@ -134,12 +143,9 @@ const crearInasistencia = async (datos) => {
       fecha,
       tipo,
       observacion,
-      "Normal",
-    ],
+      estado,
+    ]
   );
-
-  // Recalcular estado despuÃ©s de crear.
-  await actualizarEstadoEstudiante(id_estudiante);
 
   return resultado;
 };
@@ -153,25 +159,9 @@ const actualizarInasistencia = async (id, datos) => {
     fecha,
     tipo,
     observacion,
+    estado,
   } = datos;
 
-  // Obtener estudiante anterior
-  const [registro] = await conexion.query(
-    `
-    SELECT id_estudiante
-    FROM inasistencias
-    WHERE id_inasistencia = ?
-    `,
-    [id],
-  );
-
-  if (registro.length === 0) {
-    throw new Error("Inasistencia no encontrada");
-  }
-
-  const estudianteAnterior = registro[0].id_estudiante;
-
-  // Actualizar registro
   const [resultado] = await conexion.query(
     `
     UPDATE inasistencias
@@ -179,7 +169,8 @@ const actualizarInasistencia = async (id, datos) => {
       id_estudiante = ?,
       fecha = ?,
       tipo = ?,
-      observacion = ?
+      observacion = ?,
+      estado = ?
     WHERE id_inasistencia = ?
     `,
     [
@@ -187,19 +178,10 @@ const actualizarInasistencia = async (id, datos) => {
       fecha,
       tipo,
       observacion,
+      estado,
       id,
-    ],
+    ]
   );
-
-  // Recalcular estudiante nuevo
-  await actualizarEstadoEstudiante(id_estudiante);
-
-  // Si cambiÃ³ de estudiante, recalcular el anterior
-  if (
-    Number(estudianteAnterior) !== Number(id_estudiante)
-  ) {
-    await actualizarEstadoEstudiante(estudianteAnterior);
-  }
 
   return resultado;
 };
@@ -208,39 +190,20 @@ const actualizarInasistencia = async (id, datos) => {
 // ELIMINAR INASISTENCIA
 // ==========================================
 const eliminarInasistencia = async (id) => {
-  // Primero obtener el estudiante
-  const [registro] = await conexion.query(
-    `
-    SELECT id_estudiante
-    FROM inasistencias
-    WHERE id_inasistencia = ?
-    `,
-    [id],
-  );
-
-  if (registro.length === 0) {
-    throw new Error("Inasistencia no encontrada");
-  }
-
-  const id_estudiante = registro[0].id_estudiante;
-
-  // Eliminar
   const [resultado] = await conexion.query(
     `
     DELETE FROM inasistencias
     WHERE id_inasistencia = ?
     `,
-    [id],
+    [id]
   );
-
-  // Recalcular estado despuÃ©s de eliminar
-  await actualizarEstadoEstudiante(id_estudiante);
 
   return resultado;
 };
 
 module.exports = {
   obtenerInasistencias,
+  obtenerInasistenciasPorEstudiante,
   crearInasistencia,
   actualizarInasistencia,
   eliminarInasistencia,
