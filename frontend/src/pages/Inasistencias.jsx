@@ -267,7 +267,7 @@ function Inasistencias() {
         id_estudiante: item.id_estudiante,
         tipo: "inasistencia",
         numero_reporte: numeroReporte,
-        fecha_generacion: new Date().toISOString(),
+        fecha_generacion: new Date().toISOString().split("T")[0],
         archivo_pdf: null,
         observacion: "Notificado por WhatsApp",
       });
@@ -278,18 +278,7 @@ function Inasistencias() {
         window.open(url, "_blank");
       }
 
-      setInasistencias((anteriores) =>
-        anteriores.map((registro) =>
-          Number(registro.id_estudiante) === Number(item.id_estudiante)
-            ? {
-                ...registro,
-                total_cartas_inasistencia: Math.floor(
-                  Number(registro.total_inasistencias) / 3
-                ),
-              }
-            : registro
-        )
-      );
+      await cargarInasistencias();
 
       Swal.fire({
         title: "Notificación realizada",
@@ -839,6 +828,8 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
+
 
 
 

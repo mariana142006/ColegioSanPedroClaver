@@ -111,8 +111,7 @@ const cargarUniformes = async () => {
 
     return Object.values(estudiantesAlertas).filter(
       (item) =>
-        item.total_uniforme >= 3 &&
-        item.carta_generada === 0
+        item.total_uniforme >= 3 && Number(item.carta_generada) === 0
     );
   };
 
@@ -157,7 +156,7 @@ const cargarUniformes = async () => {
         id_estudiante: item.id_estudiante,
         tipo: "uniforme",
         numero_reporte: numeroReporte,
-        fecha_generacion: new Date().toISOString(),
+        fecha_generacion: new Date().toISOString().split("T")[0],
         archivo_pdf: null,
         observacion: "Notificado por WhatsApp",
       });
@@ -168,16 +167,7 @@ const cargarUniformes = async () => {
         window.open(url, "_blank");
       }
 
-      setUniformes((anteriores) =>
-        anteriores.map((registro) =>
-          Number(registro.id_estudiante) === Number(item.id_estudiante)
-            ? {
-                ...registro,
-                carta_generada: 1,
-              }
-            : registro
-        )
-      );
+      await cargarUniformes();
 
       Swal.fire({
         title: "Notificación realizada",
@@ -461,8 +451,10 @@ const cargarUniformes = async () => {
                 <td>{item.motivo}</td>
 
                 <td>
-                  {item.total_uniforme >= 3 ? (
+                  {item.total_uniforme >= 3 && Number(item.carta_generada) === 0 ? (
                     <span className="badge bg-danger">Alerta</span>
+                  ) : item.total_uniforme >= 3 && Number(item.carta_generada) > 0 ? (
+                    <span className="badge bg-success">Notificado</span>
                   ) : item.total_uniforme == 2 ? (
                     <span className="badge bg-warning text-dark">
                       Seguimiento
@@ -967,6 +959,11 @@ const cargarUniformes = async () => {
 }
 
 export default Uniformes;
+
+
+
+
+
 
 
 

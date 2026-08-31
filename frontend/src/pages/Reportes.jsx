@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import api from "../services/api";
 import Swal from "sweetalert2";
 import CartaReporte from "../components/CartaReporte";
@@ -227,7 +227,7 @@ function Reportes() {
           className="btn btn-naranja"
           onClick={generarReporteGeneral}
         >
-          📄 Generar reporte general
+          Generar reporte general
         </button>
       </div>
 
@@ -258,6 +258,7 @@ function Reportes() {
                 <th>Grado</th>
                 <th>Tipo</th>
                 <th>Fecha</th>
+                <th>Estado</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -306,6 +307,22 @@ function Reportes() {
                           }
                         )
                       : "Sin fecha"}
+                  </td>
+
+                  <td>
+                    {carta.observacion === "Notificado por WhatsApp" ? (
+                      <span className="badge bg-success">
+                        Notificado por WhatsApp
+                      </span>
+                    ) : carta.observacion ? (
+                      <span className="badge bg-secondary">
+                        {carta.observacion}
+                      </span>
+                    ) : (
+                      <span className="text-muted">
+                        Sin observación
+                      </span>
+                    )}
                   </td>
 
                   <td>
@@ -380,3 +397,7 @@ function Reportes() {
 }
 
 export default Reportes;
+
+
+
+
