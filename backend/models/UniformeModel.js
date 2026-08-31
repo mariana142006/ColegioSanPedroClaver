@@ -1,4 +1,4 @@
-const conexion = require("../database/conexion");
+﻿const conexion = require("../database/conexion");
 
 // ==========================================
 // LISTAR UNIFORMES
@@ -28,7 +28,16 @@ const obtenerUniformes = async () => {
         FROM cartas c
         WHERE c.id_estudiante = u.id_estudiante
           AND c.tipo = 'uniforme'
-      ) AS carta_generada
+      ) AS carta_generada,
+
+      (
+        SELECT c.observacion
+        FROM cartas c
+        WHERE c.id_estudiante = u.id_estudiante
+          AND c.tipo = 'uniforme'
+        ORDER BY c.id_carta DESC
+        LIMIT 1
+      ) AS ultima_observacion_carta
 
     FROM uniforme u
 
@@ -127,3 +136,4 @@ module.exports = {
   actualizarUniforme,
   eliminarUniforme,
 };
+

@@ -24,7 +24,17 @@ const obtenerLlegadas = async () => {
         FROM cartas c
         WHERE c.id_estudiante = l.id_estudiante
           AND c.tipo = 'llegada'
-      ) AS carta_generada
+      ) AS carta_generada,
+
+      (
+        SELECT c.observacion
+        FROM cartas c
+        WHERE c.id_estudiante = l.id_estudiante
+          AND c.tipo = 'llegada'
+        ORDER BY c.id_carta DESC
+        LIMIT 1
+      ) AS ultima_observacion_carta,
+
 
     FROM llegadas_tarde l
 
@@ -108,7 +118,7 @@ const crearLlegada = async (datos) => {
   // ==========================================
   if (segundosHoraActual <= segundosHoraEntrada) {
     throw new Error(
-      `No se puede registrar una llegada tarde todavía. ` +
+      `No se puede registrar una llegada tarde todavÃ­a. ` +
       `La hora de entrada es ${horaEntradaTexto} y la hora actual es ${hora}.`
     );
   }
@@ -289,7 +299,7 @@ const eliminarLlegada = async (id) => {
   );
 
   // ==========================================
-  // RECALCULAR DESPUÉS DE ELIMINAR
+  // RECALCULAR DESPUÃ‰S DE ELIMINAR
   // ==========================================
   await actualizarTotalesMes(
     estudiante,
@@ -431,3 +441,7 @@ module.exports = {
   actualizarTotalesMes,
   marcarAlertaRevisada,
 };
+
+
+
+

@@ -1,4 +1,4 @@
-const conexion = require("../database/conexion");
+﻿const conexion = require("../database/conexion");
 
 // ==========================================
 // OBTENER TODAS LAS INASISTENCIAS
@@ -29,7 +29,17 @@ const obtenerInasistencias = async () => {
         FROM cartas c
         WHERE c.id_estudiante = i.id_estudiante
           AND c.tipo = 'inasistencia'
-      ) AS total_cartas_inasistencia
+      ) AS total_cartas_inasistencia,
+
+      (
+        SELECT c.observacion
+        FROM cartas c
+        WHERE c.id_estudiante = i.id_estudiante
+          AND c.tipo = 'inasistencia'
+        ORDER BY c.id_carta DESC
+        LIMIT 1
+      ) AS ultima_observacion_carta,
+
 
     FROM inasistencias i
 
@@ -128,7 +138,7 @@ const crearInasistencia = async (datos) => {
     ],
   );
 
-  // Recalcular estado después de crear.
+  // Recalcular estado despuÃ©s de crear.
   await actualizarEstadoEstudiante(id_estudiante);
 
   return resultado;
@@ -184,7 +194,7 @@ const actualizarInasistencia = async (id, datos) => {
   // Recalcular estudiante nuevo
   await actualizarEstadoEstudiante(id_estudiante);
 
-  // Si cambió de estudiante, recalcular el anterior
+  // Si cambiÃ³ de estudiante, recalcular el anterior
   if (
     Number(estudianteAnterior) !== Number(id_estudiante)
   ) {
@@ -223,7 +233,7 @@ const eliminarInasistencia = async (id) => {
     [id],
   );
 
-  // Recalcular estado después de eliminar
+  // Recalcular estado despuÃ©s de eliminar
   await actualizarEstadoEstudiante(id_estudiante);
 
   return resultado;
@@ -235,3 +245,7 @@ module.exports = {
   actualizarInasistencia,
   eliminarInasistencia,
 };
+
+
+
+

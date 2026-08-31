@@ -158,7 +158,7 @@ const cargarUniformes = async () => {
         numero_reporte: numeroReporte,
         fecha_generacion: new Date().toISOString().split("T")[0],
         archivo_pdf: null,
-        observacion: "Notificado por WhatsApp",
+        observacion: item.motivo || item.observacion || "Notificado por WhatsApp",
       });
 
       if (ventanaWhatsApp) {
@@ -962,6 +962,7 @@ const cargarUniformes = async () => {
 }
 
 export default Uniformes;
+
 
 
 
