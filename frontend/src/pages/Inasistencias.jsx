@@ -229,7 +229,7 @@ function Inasistencias() {
   // ============================================================
   // NOTIFICAR ACUDIENTE POR WHATSAPP
   // ============================================================
-  const notificarAcudienteWhatsApp = (item) => {
+  const notificarAcudienteWhatsApp = async (item) => {
     if (!item.telefono_acudiente) {
       Swal.fire(
         "Sin telefono",
@@ -239,10 +239,8 @@ function Inasistencias() {
       return;
     }
 
-    let telefono = String(item.telefono_acudiente)
-      .replace(/\D/g, "");
+    let telefono = String(item.telefono_acudiente).replace(/\D/g, "");
 
-    // Numero celular colombiano de 10 digitos
     if (telefono.length === 10 && telefono.startsWith("3")) {
       telefono = "57" + telefono;
     }
@@ -252,15 +250,71 @@ function Inasistencias() {
       `Nos permitimos informarle que el estudiante ${item.nombres}, ` +
       `del grado ${item.grado}, ha acumulado ${item.total_inasistencias} ` +
       `inasistencias. ` +
-      `Agradecemos su atencion y acompanamiento para fortalecer ` +
+      `Agradecemos su atención y acompañamiento para fortalecer ` +
       `la asistencia del estudiante al Colegio San Pedro Claver.`;
 
     const url =
       `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
 
-    window.open(url, "_blank");
-  };
+    const ventanaWhatsApp = window.open("about:blank", "_blank");
 
+    try {
+      const respuestaNumero = await api.get("/cartas/numero");
+
+      const numeroReporte = respuestaNumero.data.numero;
+
+      await api.post("/cartas", {
+        id_estudiante: item.id_estudiante,
+        tipo: "inasistencia",
+        numero_reporte: numeroReporte,
+        fecha_generacion: new Date().toISOString(),
+        archivo_pdf: null,
+        observacion: "Notificado por WhatsApp",
+      });
+
+      if (ventanaWhatsApp) {
+        ventanaWhatsApp.location.href = url;
+      } else {
+        window.open(url, "_blank");
+      }
+
+      setInasistencias((anteriores) =>
+        anteriores.map((registro) =>
+          Number(registro.id_estudiante) === Number(item.id_estudiante)
+            ? {
+                ...registro,
+                total_cartas_inasistencia: Math.floor(
+                  Number(registro.total_inasistencias) / 3
+                ),
+              }
+            : registro
+        )
+      );
+
+      Swal.fire({
+        title: "Notificación realizada",
+        text: "Se notificó al acudiente por WhatsApp y el reporte fue registrado.",
+        icon: "success",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error(
+        "Error registrando notificación por WhatsApp:",
+        error
+      );
+
+      if (ventanaWhatsApp) {
+        ventanaWhatsApp.close();
+      }
+
+      Swal.fire(
+        "Error",
+        "No se pudo registrar la notificación en el sistema.",
+        "error"
+      );
+    }
+  };
   return (
     <div className="usuarios-container">
       <h2 className="fw-bold">Gestión de Inasistencias</h2>
@@ -785,6 +839,7 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
 
 
 

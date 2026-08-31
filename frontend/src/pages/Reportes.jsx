@@ -13,7 +13,7 @@ function Reportes() {
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
   const [paginaActual, setPaginaActual] = useState(1);
-  const reportesPorPagina = 10;
+  const reportesPorPagina = 3;
 
   const cargarCartas = async () => {
     try {
@@ -333,7 +333,7 @@ function Reportes() {
         </div>
       )}
 
-      {cartasFiltradas.length > 0 && totalPaginas > 1 && (
+      {cartasFiltradas.length > 10 && totalPaginas > 1 && (
         <div className="d-flex justify-content-center align-items-center gap-3 mt-3">
           <button
             className="btn btn-outline-primary"
