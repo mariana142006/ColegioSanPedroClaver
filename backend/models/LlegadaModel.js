@@ -33,7 +33,7 @@ const obtenerLlegadas = async () => {
           AND c.tipo = 'llegada'
         ORDER BY c.id_carta DESC
         LIMIT 1
-      ) AS ultima_observacion_carta,
+      ) AS ultima_observacion_carta
 
 
     FROM llegadas_tarde l
@@ -441,7 +441,4 @@ module.exports = {
   actualizarTotalesMes,
   marcarAlertaRevisada,
 };
-
-
-
 

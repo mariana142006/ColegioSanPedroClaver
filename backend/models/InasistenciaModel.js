@@ -38,7 +38,7 @@ const obtenerInasistencias = async () => {
           AND c.tipo = 'inasistencia'
         ORDER BY c.id_carta DESC
         LIMIT 1
-      ) AS ultima_observacion_carta,
+      ) AS ultima_observacion_carta
 
 
     FROM inasistencias i
@@ -245,7 +245,4 @@ module.exports = {
   actualizarInasistencia,
   eliminarInasistencia,
 };
-
-
-
 
