@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import api from "../services/api";
 import "../styles/usuarios.css";
 import Swal from "sweetalert2";
@@ -292,7 +292,7 @@ function Llegadas() {
   // ============================================================
   // NOTIFICAR ACUDIENTE POR WHATSAPP
   // ============================================================
-  const notificarAcudienteWhatsApp = (item) => {
+  const notificarAcudienteWhatsApp = async (item) => {
     if (!item.telefono_acudiente) {
       Swal.fire(
         "Sin teléfono",
@@ -302,10 +302,8 @@ function Llegadas() {
       return;
     }
 
-    let telefono = String(item.telefono_acudiente)
-      .replace(/\D/g, "");
+    let telefono = String(item.telefono_acudiente).replace(/\D/g, "");
 
-    // Si el número está guardado como celular colombiano de 10 dígitos
     if (telefono.length === 10 && telefono.startsWith("3")) {
       telefono = "57" + telefono;
     }
@@ -318,11 +316,58 @@ function Llegadas() {
       `Agradecemos su atención y acompañamiento en el cumplimiento ` +
       `de los horarios de ingreso al Colegio San Pedro Claver.`;
 
-    const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+    const url =
+      `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
 
-    window.open(url, "_blank");
+    const ventanaWhatsApp = window.open("about:blank", "_blank");
+
+    try {
+      const respuestaNumero = await api.get("/cartas/numero");
+
+      const numeroReporte = respuestaNumero.data.numero;
+
+      await api.post("/cartas", {
+        id_estudiante: item.id_estudiante,
+        tipo: "llegada",
+        numero_reporte: numeroReporte,
+        fecha_generacion: new Date().toISOString().split("T")[0],
+        archivo_pdf: null,
+        observacion: "Notificado por WhatsApp",
+      });
+
+      if (ventanaWhatsApp) {
+        ventanaWhatsApp.location.href = url;
+      } else {
+        window.open(url, "_blank");
+      }
+
+      await cargarLlegadas();
+
+      Swal.fire({
+        title: "Notificación realizada",
+        text: "Se notificó al acudiente por WhatsApp y la alerta fue registrada.",
+        icon: "success",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+
+    } catch (error) {
+      console.error(
+        "Error registrando notificación por WhatsApp:",
+        error
+      );
+
+      if (ventanaWhatsApp) {
+        ventanaWhatsApp.close();
+      }
+
+      Swal.fire(
+        "Error",
+        "No se pudo registrar la notificación en el sistema.",
+        "error"
+      );
+    }
   };
-
   return (
     <div className="usuarios-container">
 
@@ -1099,4 +1144,7 @@ function Llegadas() {
 }
 
 export default Llegadas;
+
+
+
 

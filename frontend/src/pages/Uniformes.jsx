@@ -570,7 +570,7 @@ const cargarUniformes = async () => {
                   <input
                     type="text"
                     className="form-control mb-2"
-                    placeholder="Buscar estudiante por nombre..."
+                    placeholder="Escriba nombre o documento..."
                     value={busquedaEstudiante}
                     onChange={(e) => {
                       setBusquedaEstudiante(e.target.value);
@@ -582,7 +582,7 @@ const cargarUniformes = async () => {
                     }}
                   />
 
-                  {busquedaEstudiante && !formulario.id_estudiante && (
+                  {busquedaEstudiante.trim() && !formulario.id_estudiante && (
                     <div
                       style={{
                         maxHeight: "220px",
@@ -592,8 +592,13 @@ const cargarUniformes = async () => {
                         marginBottom: "16px",
                       }}
                     >
-                      {estudiantesFiltrados
-                        .slice(0, 20)
+                      {estudiantes.filter((estudiante) => {
+                          const texto = busquedaEstudiante.toLowerCase().trim();
+                          const nombre = estudiante.nombres?.toLowerCase() || "";
+                          const documento = String(estudiante.documento || "").toLowerCase();
+
+                          return nombre.includes(texto) || documento.includes(texto);
+                        }).slice(0, 20)
                         .map((estudiante) => (
                           <div
                             key={estudiante.id_estudiante}
@@ -605,9 +610,7 @@ const cargarUniformes = async () => {
                               });
 
                               setBusquedaEstudiante(
-                                estudiante.nombres +
-                                  " - " +
-                                  estudiante.grado
+                                `${estudiante.nombres} - ${estudiante.documento} - ${estudiante.grado}`
                               );
                             }}
                             style={{
@@ -616,7 +619,7 @@ const cargarUniformes = async () => {
                               borderBottom: "1px solid #eee",
                             }}
                           >
-                            {estudiante.nombres} - {estudiante.grado}
+                            <div><strong>{estudiante.nombres}</strong></div><small className="text-muted">{estudiante.documento} - {estudiante.grado}</small>
                           </div>
                         ))}
 
@@ -959,6 +962,8 @@ const cargarUniformes = async () => {
 }
 
 export default Uniformes;
+
+
 
 
 
