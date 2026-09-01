@@ -258,48 +258,46 @@ function Llegadas() {
   // OBTENER ALERTAS
   // ==========================================
   const obtenerAlertas = () => {
-    const estudiantes = {};
+    const grupos = {};
 
     llegadas.forEach((item) => {
-      const id = item.id_estudiante;
+      const idEstudiante = Number(item.id_estudiante);
+      const grupo = Number(item.grupo_alerta || 0);
+      const generoAlerta = Number(item.genero_alerta || 0);
 
-      if (!estudiantes[id]) {
-        estudiantes[id] = {
+      if (!idEstudiante || !grupo || generoAlerta !== 1) {
+        return;
+      }
+
+      const clave = `${idEstudiante}-${grupo}`;
+
+      // El registro con genero_alerta = 1
+      // es el tercer registro de ese grupo.
+      // Cada grupo tiene su propia alerta.
+      if (
+        !grupos[clave] ||
+        Number(item.id_llegada || 0) >
+          Number(grupos[clave].id_llegada || 0)
+      ) {
+        grupos[clave] = {
           ...item,
           total_llegadas: Number(item.total_mes || 0),
         };
       }
     });
 
-    return Object.values(estudiantes).filter(
-      (item) => {
-        const total = Number(item.total_mes || 0);
+    return Object.values(grupos).filter((item) => {
+      const cartaGenerada =
+        Number(item.carta_generada || 0) > 0;
 
-        const cartasGeneradas = Number(
-          item.carta_generada || 0
-        );
+      const whatsappNotificado =
+        Number(item.notificado_whatsapp || 0) > 0;
 
-        const whatsappNotificado = Number(
-          item.notificado_whatsapp || 0
-        );
-
-        // Carta y WhatsApp atienden la MISMA alerta.
-        // Por eso no se deben sumar.
-        const alertasAtendidas = Math.max(
-          cartasGeneradas,
-          whatsappNotificado
-        );
-
-        const alertasGeneradas = Math.floor(
-          total / 3
-        );
-
-        return (
-          total >= 3 &&
-          alertasGeneradas > alertasAtendidas
-        );
-      }
-    );
+      // Carta y WhatsApp atienden la misma alerta.
+      // Si ninguna de las dos acciones se ha realizado,
+      // la alerta debe aparecer.
+      return !cartaGenerada && !whatsappNotificado;
+    });
   };
   // ============================================================
   // NOTIFICAR ACUDIENTE POR WHATSAPP
@@ -340,6 +338,7 @@ function Llegadas() {
 
       await api.post("/cartas", {
         id_estudiante: item.id_estudiante,
+        grupo_alerta: item.grupo_alerta,
         tipo: "llegada",
         numero_reporte: numeroReporte,
         fecha_generacion: item.fecha
@@ -624,7 +623,7 @@ function Llegadas() {
 
           {obtenerAlertas().map((item) => (
             <div
-              key={item.id_estudiante}
+              key={`${item.id_estudiante}-${item.grupo_alerta}`}
               className="mb-3 p-2 rounded"
             >
               <strong>{item.nombres}</strong>
@@ -743,30 +742,80 @@ function Llegadas() {
               </td>
 
               <td>
-                {Number(llegada.total_mes || 0) >= 3 ? (
-  Number(llegada.notificado_whatsapp || 0) > 0 ? (
-    <span className="badge bg-success">
-      Notificado por WhatsApp
-    </span>
-  ) : Number(llegada.carta_generada || 0) > 0 ? (
-    <span className="badge bg-success">
-      Carta generada
-    </span>
-  ) : (
-    <span className="badge bg-danger">
-      Generar carta
-    </span>
-  )
-) : Number(llegada.total_mes || 0) === 2 ? (
-  <span className="badge bg-warning text-dark">
-    Seguimiento
-  </span>
-) : (
-  <span className="badge bg-success">
-    Normal
-  </span>
-)}
-</td>
+                {(() => {
+                  // ==========================================
+                  // LOGICA POR GRUPOS DE 3
+                  //
+                  // 1,2,3 = GRUPO 1
+                  // 4,5,6 = GRUPO 2
+                  // 7,8,9 = GRUPO 3
+                  //
+                  // Cada grupo es independiente.
+                  // ==========================================
+
+                  const grupo = Number(llegada.grupo_alerta || 0);
+
+                  const registrosGrupo = llegadas.filter(
+                    (registro) =>
+                      Number(registro.id_estudiante) ===
+                        Number(llegada.id_estudiante) &&
+                      Number(registro.grupo_alerta || 0) === grupo
+                  ).length;
+
+                  const cartaGenerada =
+                    Number(llegada.carta_generada || 0) > 0;
+
+                  const whatsappNotificado =
+                    Number(llegada.notificado_whatsapp || 0) > 0;
+
+                  // ==========================================
+                  // GRUPO YA ATENDIDO
+                  // ==========================================
+
+                  if (cartaGenerada) {
+                    return (
+                      <span className="badge bg-success">
+                        Carta generada
+                      </span>
+                    );
+                  }
+
+                  if (whatsappNotificado) {
+                    return (
+                      <span className="badge bg-success">
+                        Notificado por WhatsApp
+                      </span>
+                    );
+                  }
+
+                  // ==========================================
+                  // ESTADO DEL GRUPO
+                  // ==========================================
+
+                  if (registrosGrupo >= 3) {
+                    return (
+                      <span className="badge bg-danger">
+                        Generar carta
+                      </span>
+                    );
+                  }
+
+                  if (registrosGrupo === 2) {
+                    return (
+                      <span className="badge bg-warning text-dark">
+                        Seguimiento
+                      </span>
+                    );
+                  }
+
+                  return (
+                    <span className="badge bg-secondary">
+                      Normal
+                    </span>
+                  );
+                })()}
+              </td>
+
 
 <td>
 
@@ -1119,14 +1168,7 @@ function Llegadas() {
                   <button
                     className="btn btn-naranja"
                     onClick={() => {
-                      const estudiante =
-                        llegadas.find(
-                          (item) =>
-                            Number(
-                              item.id_estudiante
-                            ) ===
-                            Number(reportesVer)
-                        );
+                      const estudiante = llegadas.find((item) => Number(item.id_estudiante) === Number(reportesVer) && Number(item.grupo_alerta || 0) === Math.max(...llegadas.filter((r) => Number(r.id_estudiante) === Number(reportesVer)).map((r) => Number(r.grupo_alerta || 0))));
 
                       setEstudianteCarta(
                         estudiante
@@ -1162,6 +1204,7 @@ function Llegadas() {
           tipo="llegada"
           estudiante={estudianteCarta}
           total={estudianteCarta?.total_mes}
+          grupoAlerta={estudianteCarta?.grupo_alerta}
           fechaLlegada={fechaCarta}
           onCerrar={() => { setMostrarCarta(false); cargarLlegadas(); }}
           onGenerarPDF={() => {}}
@@ -1173,6 +1216,22 @@ function Llegadas() {
 }
 
 export default Llegadas;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,11 +1,14 @@
 ﻿const conexion = require("../database/conexion");
 
-// Obtener todas las cartas
+// ==========================================
+// OBTENER TODAS LAS CARTAS
+// ==========================================
 const obtenerCartas = async () => {
   const [rows] = await conexion.query(`
     SELECT
       c.id_carta,
       c.id_estudiante,
+      c.grupo_alerta,
       c.tipo,
       c.numero_reporte,
       c.fecha_generacion,
@@ -23,10 +26,13 @@ const obtenerCartas = async () => {
   return rows;
 };
 
-// Crear carta
+// ==========================================
+// CREAR CARTA
+// ==========================================
 const crearCarta = async (datos) => {
   const {
     id_estudiante,
+    grupo_alerta,
     tipo,
     numero_reporte,
     fecha_generacion,
@@ -39,16 +45,18 @@ const crearCarta = async (datos) => {
     INSERT INTO cartas
     (
       id_estudiante,
+      grupo_alerta,
       tipo,
       numero_reporte,
       fecha_generacion,
       archivo_pdf,
       observacion
     )
-    VALUES (?,?,?,?,?,?)
+    VALUES (?,?,?,?,?,?,?)
     `,
     [
       id_estudiante,
+      grupo_alerta,
       tipo,
       numero_reporte,
       fecha_generacion,
@@ -60,19 +68,23 @@ const crearCarta = async (datos) => {
   return resultado;
 };
 
-// Obtener siguiente número de reporte
+// ==========================================
+// OBTENER SIGUIENTE NÚMERO DE REPORTE
+// ==========================================
 const obtenerSiguienteNumero = async () => {
   const [rows] = await conexion.query(`
     SELECT COUNT(*) AS total
     FROM cartas
   `);
 
-  const numero = rows[0].total + 1;
+  const numero = Number(rows[0].total) + 1;
 
   return numero.toString().padStart(4, "0");
 };
 
-// Eliminar carta/reporte
+// ==========================================
+// ELIMINAR CARTA / REPORTE
+// ==========================================
 const eliminarCarta = async (id) => {
   const [resultado] = await conexion.query(
     `

@@ -12,6 +12,7 @@ const obtenerLlegadas = async () => {
       l.hora,
       l.observacion,
       l.total_mes,
+      l.grupo_alerta,
       l.genero_alerta,
       l.estado_alerta,
 
@@ -27,8 +28,7 @@ const obtenerLlegadas = async () => {
         WHERE c.id_estudiante = l.id_estudiante
           AND c.tipo = 'llegada'
           AND c.observacion NOT LIKE 'Notificado por WhatsApp%'
-          AND MONTH(c.fecha_generacion) = MONTH(l.fecha)
-          AND YEAR(c.fecha_generacion) = YEAR(l.fecha)
+          AND c.grupo_alerta = l.grupo_alerta
       ) AS carta_generada,
 
       (
@@ -37,8 +37,7 @@ const obtenerLlegadas = async () => {
         WHERE c.id_estudiante = l.id_estudiante
           AND c.tipo = 'llegada'
           AND c.observacion LIKE 'Notificado por WhatsApp%'
-          AND MONTH(c.fecha_generacion) = MONTH(l.fecha)
-          AND YEAR(c.fecha_generacion) = YEAR(l.fecha)
+          AND c.grupo_alerta = l.grupo_alerta
       ) AS notificado_whatsapp,
 
       (
@@ -46,12 +45,10 @@ const obtenerLlegadas = async () => {
         FROM cartas c
         WHERE c.id_estudiante = l.id_estudiante
           AND c.tipo = 'llegada'
-          AND MONTH(c.fecha_generacion) = MONTH(l.fecha)
-          AND YEAR(c.fecha_generacion) = YEAR(l.fecha)
+          AND c.grupo_alerta = l.grupo_alerta
         ORDER BY c.id_carta DESC
         LIMIT 1
       ) AS ultima_observacion_carta
-
 
     FROM llegadas_tarde l
 
@@ -63,6 +60,7 @@ const obtenerLlegadas = async () => {
 
   return rows;
 };
+
 
 // ==========================================
 // CREAR LLEGADA TARDE
@@ -106,7 +104,7 @@ const crearLlegada = async (datos) => {
   }
 
   // ==========================================
-  // CONVERTIR HORAS A SEGUNDOS PARA COMPARAR
+  // CONVERTIR HORAS A SEGUNDOS
   // ==========================================
   const horaActualPartes = hora
     .split(":")
@@ -131,43 +129,61 @@ const crearLlegada = async (datos) => {
     horaEntradaPartes[2];
 
   // ==========================================
-  // VALIDAR SI REALMENTE ES LLEGADA TARDE
+  // VALIDAR LLEGADA TARDE
   // ==========================================
   if (segundosHoraActual <= segundosHoraEntrada) {
     throw new Error(
-      `No se puede registrar una llegada tarde todavÃ­a. ` +
+      `No se puede registrar una llegada tarde todavía. ` +
       `La hora de entrada es ${horaEntradaTexto} y la hora actual es ${hora}.`
     );
   }
 
   // ==========================================
-  // CONTAR LLEGADAS DEL MISMO MES
+  // CONTAR LLEGADAS DEL MES
   // ==========================================
   const [conteo] = await conexion.query(
     `
       SELECT COUNT(*) AS total
       FROM llegadas_tarde
       WHERE id_estudiante = ?
-        AND MONTH(fecha) = MONTH(?)
-        AND YEAR(fecha) = YEAR(?)
+        AND fecha >= DATE_FORMAT(?, '%Y-%m-01')
+        AND fecha < DATE_ADD(
+          DATE_FORMAT(?, '%Y-%m-01'),
+          INTERVAL 1 MONTH
+        )
     `,
-    [id_estudiante, fecha, fecha],
+    [id_estudiante, fecha, fecha]
   );
 
   const totalMes = Number(conteo[0].total) + 1;
 
   // ==========================================
-  // GENERAR ALERTA DESDE LA TERCERA LLEGADA
+  // CALCULAR GRUPO DE ALERTA
+  //
+  // 1,2,3   = grupo 1
+  // 4,5,6   = grupo 2
+  // 7,8,9   = grupo 3
   // ==========================================
-  const generaAlerta = totalMes >= 3 ? 1 : 0;
+  const grupoAlerta = Math.ceil(totalMes / 3);
+
+  // ==========================================
+  // POSICION DENTRO DEL GRUPO
+  //
+  // 1 = Normal
+  // 2 = Seguimiento
+  // 3 = Generar alerta
+  // ==========================================
+  const posicionGrupo = ((totalMes - 1) % 3) + 1;
+
+  const generaAlerta = posicionGrupo === 3 ? 1 : 0;
 
   const estadoAlerta =
-    generaAlerta === 1
+    posicionGrupo === 3
       ? "Pendiente"
       : "Atendida";
 
   // ==========================================
-  // INSERTAR LLEGADA
+  // INSERTAR NUEVA LLEGADA
   // ==========================================
   const [resultado] = await conexion.query(
     `
@@ -178,10 +194,11 @@ const crearLlegada = async (datos) => {
         hora,
         observacion,
         total_mes,
+        grupo_alerta,
         genero_alerta,
         estado_alerta
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `,
     [
       id_estudiante,
@@ -189,18 +206,15 @@ const crearLlegada = async (datos) => {
       hora,
       observacion || null,
       totalMes,
+      grupoAlerta,
       generaAlerta,
       estadoAlerta,
-    ],
+    ]
   );
-
-  // ==========================================
-  // ACTUALIZAR TODAS LAS LLEGADAS DEL MES
-  // ==========================================
-  await actualizarTotalesMes(id_estudiante, fecha);
 
   return resultado;
 };
+
 
 // ==========================================
 // ACTUALIZAR LLEGADA
@@ -213,9 +227,6 @@ const actualizarLlegada = async (id, datos) => {
     observacion,
   } = datos;
 
-  // ==========================================
-  // BUSCAR DATOS ANTERIORES
-  // ==========================================
   const [anterior] = await conexion.query(
     `
       SELECT
@@ -224,22 +235,13 @@ const actualizarLlegada = async (id, datos) => {
       FROM llegadas_tarde
       WHERE id_llegada = ?
     `,
-    [id],
+    [id]
   );
 
   if (anterior.length === 0) {
     throw new Error("Llegada tarde no encontrada");
   }
 
-  const estudianteAnterior =
-    anterior[0].id_estudiante;
-
-  const fechaAnterior =
-    anterior[0].fecha;
-
-  // ==========================================
-  // ACTUALIZAR SIN CAMBIAR LA HORA
-  // ==========================================
   const [resultado] = await conexion.query(
     `
       UPDATE llegadas_tarde
@@ -254,35 +256,17 @@ const actualizarLlegada = async (id, datos) => {
       fecha,
       observacion || null,
       id,
-    ],
-  );
-
-  // ==========================================
-  // RECALCULAR MES ANTERIOR
-  // ==========================================
-  await actualizarTotalesMes(
-    estudianteAnterior,
-    fechaAnterior,
-  );
-
-  // ==========================================
-  // RECALCULAR NUEVO MES
-  // ==========================================
-  await actualizarTotalesMes(
-    id_estudiante,
-    fecha,
+    ]
   );
 
   return resultado;
 };
 
+
 // ==========================================
 // ELIMINAR LLEGADA
 // ==========================================
 const eliminarLlegada = async (id) => {
-  // ==========================================
-  // BUSCAR LA LLEGADA ANTES DE ELIMINAR
-  // ==========================================
   const [llegada] = await conexion.query(
     `
       SELECT
@@ -291,36 +275,19 @@ const eliminarLlegada = async (id) => {
       FROM llegadas_tarde
       WHERE id_llegada = ?
     `,
-    [id],
+    [id]
   );
 
   if (llegada.length === 0) {
     throw new Error("Llegada tarde no encontrada");
   }
 
-  const estudiante =
-    llegada[0].id_estudiante;
-
-  const fecha =
-    llegada[0].fecha;
-
-  // ==========================================
-  // ELIMINAR
-  // ==========================================
   await conexion.query(
     `
       DELETE FROM llegadas_tarde
       WHERE id_llegada = ?
     `,
-    [id],
-  );
-
-  // ==========================================
-  // RECALCULAR DESPUÃ‰S DE ELIMINAR
-  // ==========================================
-  await actualizarTotalesMes(
-    estudiante,
-    fecha,
+    [id]
   );
 
   return {
@@ -328,12 +295,13 @@ const eliminarLlegada = async (id) => {
   };
 };
 
+
 // ==========================================
-// CONTAR LLEGADAS DEL MES
+// CONTAR LLEGADAS DE UN ESTUDIANTE
 // ==========================================
 const contarLlegadasEstudiante = async (
   id_estudiante,
-  fecha = null,
+  fecha = null
 ) => {
   let fechaReferencia = fecha;
 
@@ -361,90 +329,70 @@ const contarLlegadasEstudiante = async (
       id_estudiante,
       fechaReferencia,
       fechaReferencia,
-    ],
+    ]
   );
 
   return Number(rows[0].total);
 };
 
+
 // ==========================================
 // ACTUALIZAR TOTALES DEL MES
 // ==========================================
+// Se conserva por compatibilidad.
+// YA NO modifica los registros anteriores.
+// ==========================================
 const actualizarTotalesMes = async (
   id_estudiante,
-  fecha,
+  fecha
 ) => {
-  const [resultado] = await conexion.query(
-    `
-      SELECT COUNT(*) AS total
-      FROM llegadas_tarde
-      WHERE id_estudiante = ?
-        AND MONTH(fecha) = MONTH(?)
-        AND YEAR(fecha) = YEAR(?)
-    `,
-    [
-      id_estudiante,
-      fecha,
-      fecha,
-    ],
-  );
-
-  const total = Number(resultado[0].total);
-
-  const alerta = total >= 3 ? 1 : 0;
-
-  const estado =
-    total >= 3
-      ? "Pendiente"
-      : "Atendida";
-
-  // ==========================================
-  // ACTUALIZAR REGISTROS DEL MISMO MES
-  // ==========================================
-  await conexion.query(
-    `
-      UPDATE llegadas_tarde
-      SET
-        total_mes = ?,
-        genero_alerta = ?,
-        estado_alerta = ?
-      WHERE id_estudiante = ?
-        AND MONTH(fecha) = MONTH(?)
-        AND YEAR(fecha) = YEAR(?)
-    `,
-    [
-      total,
-      alerta,
-      estado,
-      id_estudiante,
-      fecha,
-      fecha,
-    ],
-  );
+  return true;
 };
 
+
 // ==========================================
-// MARCAR ALERTA COMO ATENDIDA
+// MARCAR ALERTA COMO REVISADA
+// SOLO AFECTA EL GRUPO CORRESPONDIENTE
 // ==========================================
 const marcarAlertaRevisada = async (
   id_estudiante,
-  fecha,
+  fecha
 ) => {
+  const [registro] = await conexion.query(
+    `
+      SELECT grupo_alerta
+      FROM llegadas_tarde
+      WHERE id_estudiante = ?
+        AND fecha = ?
+      ORDER BY id_llegada DESC
+      LIMIT 1
+    `,
+    [
+      id_estudiante,
+      fecha,
+    ]
+  );
+
+  if (registro.length === 0) {
+    return;
+  }
+
+  const grupo = registro[0].grupo_alerta;
+
   await conexion.query(
     `
       UPDATE llegadas_tarde
       SET estado_alerta = 'Atendida'
       WHERE id_estudiante = ?
-        AND MONTH(fecha) = MONTH(?)
-        AND YEAR(fecha) = YEAR(?)
+        AND grupo_alerta = ?
     `,
     [
       id_estudiante,
-      fecha,
-      fecha,
-    ],
+      grupo,
+    ]
   );
 };
+
 
 // ==========================================
 // EXPORTAR FUNCIONES
@@ -458,7 +406,4 @@ module.exports = {
   actualizarTotalesMes,
   marcarAlertaRevisada,
 };
-
-
-
 

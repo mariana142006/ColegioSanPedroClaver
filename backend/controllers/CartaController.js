@@ -21,7 +21,7 @@ const listarCartas = async (req, res) => {
 };
 
 // ==========================================
-// GUARDAR CARTA
+// GUARDAR CARTA / NOTIFICACIÓN
 // ==========================================
 const guardarCarta = async (req, res) => {
   try {
@@ -32,6 +32,7 @@ const guardarCarta = async (req, res) => {
 
     const {
       id_estudiante,
+      grupo_alerta,
       tipo,
       numero_reporte,
       fecha_generacion,
@@ -42,6 +43,12 @@ const guardarCarta = async (req, res) => {
     if (!id_estudiante) {
       return res.status(400).json({
         mensaje: "Falta id_estudiante.",
+      });
+    }
+
+    if (!grupo_alerta) {
+      return res.status(400).json({
+        mensaje: "Falta grupo_alerta.",
       });
     }
 
@@ -65,12 +72,14 @@ const guardarCarta = async (req, res) => {
 
     const resultado = await Carta.crearCarta(req.body);
 
-    console.log("CARTA GUARDADA CORRECTAMENTE");
+    console.log("CARTA / NOTIFICACIÓN GUARDADA CORRECTAMENTE");
     console.log("ID generado:", resultado.insertId);
+    console.log("Grupo de alerta:", grupo_alerta);
 
     res.json({
       mensaje: "Carta guardada correctamente",
       id: resultado.insertId,
+      grupo_alerta: Number(grupo_alerta),
     });
 
   } catch (error) {
@@ -111,7 +120,7 @@ const obtenerNumeroReporte = async (req, res) => {
 };
 
 // ==========================================
-// ELIMINAR CARTA
+// ELIMINAR CARTA / REPORTE
 // ==========================================
 const eliminarCarta = async (req, res) => {
   try {

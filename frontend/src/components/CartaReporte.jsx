@@ -9,7 +9,7 @@ import logoLlegadas from "../assets/logo-llegadas.png";
 
 import api from "../services/api";
 
-function CartaReporte({ tipo, estudiante, total, fechaLlegada, onCerrar, onGenerarPDF }) {
+function CartaReporte({ tipo, estudiante, total, fechaLlegada, grupoAlerta, onCerrar, onGenerarPDF }) {
   const [configuracion, setConfiguracion] = useState(null);
   const [numeroReporte, setNumeroReporte] = useState("");
   const [generando, setGenerando] = useState(false);
@@ -105,6 +105,8 @@ function CartaReporte({ tipo, estudiante, total, fechaLlegada, onCerrar, onGener
       const respuesta = await api.post("/cartas", {
         id_estudiante: estudiante.id_estudiante,
 
+        grupo_alerta: tipo === "llegada" ? grupoAlerta : null,
+
         tipo,
 
         numero_reporte: numeroReporte,
@@ -144,7 +146,9 @@ function CartaReporte({ tipo, estudiante, total, fechaLlegada, onCerrar, onGener
       await api.put("/llegadas/alerta/revisada", {
         id_estudiante: estudiante.id_estudiante,
 
-        fecha,
+        
+        grupo_alerta: tipo === "llegada" ? grupoAlerta : null,
+fecha,
       });
 
       return true;
@@ -417,6 +421,12 @@ function CartaReporte({ tipo, estudiante, total, fechaLlegada, onCerrar, onGener
 }
 
 export default CartaReporte;
+
+
+
+
+
+
 
 
 
