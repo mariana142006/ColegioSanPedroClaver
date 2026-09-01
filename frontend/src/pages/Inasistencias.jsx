@@ -111,20 +111,52 @@ function Inasistencias() {
   const guardarInasistencia = async (e) => {
     e.preventDefault();
 
+    console.log("===== GUARDAR INASISTENCIA =====");
+    console.log("FORMULARIO:", formulario);
+    console.log("TIPO:", formulario.tipo);
+    console.log("ESTUDIANTE:", formulario.id_estudiante);
+    console.log("FECHA:", formulario.fecha);
+    console.log("OBSERVACION:", formulario.observacion);
+    console.log("EDITAR:", editar);
+    console.log("ID EDITAR:", idEditar);
+
+    if (!formulario.id_estudiante) {
+      alert("Debe seleccionar un estudiante.");
+      return;
+    }
+
+    if (!formulario.fecha) {
+      alert("Debe seleccionar una fecha.");
+      return;
+    }
+
+    if (!formulario.tipo) {
+      alert("Debe seleccionar el motivo de la inasistencia.");
+      return;
+    }
+
     try {
       if (editar) {
-        await api.put(`/inasistencias/${idEditar}`, formulario);
+        await api.put(
+          `/inasistencias/${idEditar}`,
+          formulario
+        );
       } else {
-        await api.post("/inasistencias", formulario);
+        await api.post(
+          "/inasistencias",
+          formulario
+        );
       }
 
-      Swal.fire(
-        "Registrado",
+      alert(
         editar
           ? "Inasistencia actualizada correctamente"
-          : "Inasistencia registrada correctamente",
-        "success",
+          : "Inasistencia registrada correctamente"
       );
+
+      setMostrarFormulario(false);
+      setEditar(false);
+      setIdEditar(null);
 
       setFormulario({
         id_estudiante: "",
@@ -134,13 +166,23 @@ function Inasistencias() {
         estado: "Normal",
       });
 
-      setMostrarFormulario(false);
-      cargarInasistencias();
+      setBusquedaEstudiante("");
+
+      await cargarInasistencias();
+
     } catch (error) {
-      console.log(error);
+      console.log("===== ERROR GUARDANDO INASISTENCIA =====");
+      console.log("ERROR COMPLETO:", error);
+      console.log("RESPUESTA:", error.response?.data);
+      console.log("STATUS:", error.response?.status);
+      console.log("FORMULARIO ENVIADO:", formulario);
+
+      alert(
+        error.response?.data?.mensaje ||
+        "No se pudo guardar la inasistencia."
+      );
     }
   };
-
   const editarInasistencia = (item) => {
     const estudiante = estudiantes.find(
       (e) =>
@@ -434,6 +476,7 @@ function Inasistencias() {
         <tbody>
           {inasistenciasPagina.map((item) => (
             <tr key={item.id_inasistencia}>
+
               <td>{item.nombres}</td>
 
               <td>{item.grado}</td>
@@ -449,72 +492,113 @@ function Inasistencias() {
               <td>{item.tipo}</td>
 
               <td>{item.observacion}</td>
+
               <td>
-  {item.tipo !== "Sin excusa" ? (
-    <span className="badge bg-success">
-      Normal
-    </span>
-  ) : (() => {
-      const registrosSinExcusa = inasistencias.filter(
-        (registro) =>
-          Number(registro.id_estudiante) ===
-            Number(item.id_estudiante) &&
-          registro.tipo === "Sin excusa"
-      );
+                {item.tipo !== "Sin excusa" ? (
+                  <span className="badge bg-success">
+                    Normal
+                  </span>
+                ) : (() => {
+                    const registrosSinExcusa = inasistencias
+                      .filter(
+                        (registro) =>
+                          Number(registro.id_estudiante) ===
+                            Number(item.id_estudiante) &&
+                          registro.tipo === "Sin excusa"
+                      )
+                      .sort(
+                        (a, b) =>
+                          new Date(a.fecha) - new Date(b.fecha) ||
+                          Number(a.id_inasistencia) -
+                            Number(b.id_inasistencia)
+                      );
 
-      const totalSinExcusa = registrosSinExcusa.length;
+                    const posicion =
+                      registrosSinExcusa.findIndex(
+                        (registro) =>
+                          Number(registro.id_inasistencia) ===
+                          Number(item.id_inasistencia)
+                      ) + 1;
 
-      // 1 Sin excusa → Normal
-      if (totalSinExcusa < 2) {
-        return (
-          <span className="badge bg-success">
-            Normal
-          </span>
-        );
-      }
+                    const totalSinExcusa =
+                      registrosSinExcusa.length;
 
-      // 2 Sin excusa → Seguimiento
-      if (totalSinExcusa % 3 === 2) {
-        return (
-          <span className="badge bg-warning text-dark">
-            Seguimiento
-          </span>
-        );
-      }
+                    if (posicion <= 0) {
+                      return (
+                        <span className="badge bg-success">
+                          Normal
+                        </span>
+                      );
+                    }
 
-      // 3, 6, 9... → Generar carta
-      if (totalSinExcusa % 3 === 0) {
-        if (Number(item.notificado_whatsapp || 0) > 0) {
-          return (
-            <span className="badge bg-success">
-              Notificado por WhatsApp
-            </span>
-          );
-        }
+                    /*
+                     * REGLA DEFINITIVA
+                     *
+                     * 1 -> Normal
+                     * 2 -> Seguimiento
+                     *
+                     * Cuando llegan 3:
+                     * 1, 2 y 3 -> Generar carta
+                     *
+                     * Cuando llegan 4:
+                     * 1, 2 y 3 -> Generar carta
+                     * 4 -> Normal
+                     *
+                     * Cuando llegan 5:
+                     * 4 -> Normal
+                     * 5 -> Seguimiento
+                     *
+                     * Cuando llegan 6:
+                     * 4, 5 y 6 -> Generar carta
+                     *
+                     * Y así sucesivamente.
+                     */
 
-        if (Number(item.total_cartas_inasistencia || 0) > 0) {
-          return (
-            <span className="badge bg-success">
-              Carta generada
-            </span>
-          );
-        }
+                    const grupo =
+                      Math.floor((posicion - 1) / 3);
 
-        return (
-          <span className="badge bg-danger">
-            Generar carta
-          </span>
-        );
-      }
+                    const inicioGrupo =
+                      grupo * 3 + 1;
 
-      return (
-        <span className="badge bg-success">
-          Normal
-        </span>
-      );
-  })()}
-</td>
-<td>
+                    const finGrupo =
+                      inicioGrupo + 2;
+
+                    /*
+                     * Si el grupo de este registro ya
+                     * tiene sus tres registros, los tres
+                     * muestran Generar carta.
+                     */
+                    if (totalSinExcusa >= finGrupo) {
+                      return (
+                        <span className="badge bg-danger">
+                          Generar carta
+                        </span>
+                      );
+                    }
+
+                    /*
+                     * El grupo todavía está incompleto.
+                     */
+                    const posicionEnGrupo =
+                      posicion - inicioGrupo + 1;
+
+                    if (posicionEnGrupo === 1) {
+                      return (
+                        <span className="badge bg-success">
+                          Normal
+                        </span>
+                      );
+                    }
+
+                    return (
+                      <span className="badge bg-warning text-dark">
+                        Seguimiento
+                      </span>
+                    );
+                })()}
+              </td>
+
+              <td>
                 <button
                   className="btn btn-outline-primary btn-sm me-2"
                   onClick={() => editarInasistencia(item)}
@@ -524,11 +608,14 @@ function Inasistencias() {
 
                 <button
                   className="btn btn-outline-danger btn-sm"
-                  onClick={() => eliminarInasistencia(item.id_inasistencia)}
+                  onClick={() =>
+                    eliminarInasistencia(item.id_inasistencia)
+                  }
                 >
                   <FaTrash />
                 </button>
               </td>
+
             </tr>
           ))}
         </tbody>
@@ -769,19 +856,15 @@ function Inasistencias() {
                     <option value="">
                       Seleccione motivo de inasistencia
                     </option>
-
                     <option value="Con excusa">
                       Con excusa
                     </option>
-
                     <option value="Sin excusa">
                       Sin excusa
                     </option>
-
                     <option value="Incapacidad">
                       Incapacidad
                     </option>
-
                     <option value="Permiso">
                       Permiso
                     </option>
@@ -914,6 +997,11 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
+
+
+
+
 
 
 
