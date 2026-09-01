@@ -483,29 +483,33 @@ function Inasistencias() {
       }
 
       // 3, 6, 9... → Generar carta
-      if (
-        Number(item.notificado_whatsapp || 0) > 0
-      ) {
-        return (
-          <span className="badge bg-success">
-            Notificado por WhatsApp
-          </span>
-        );
-      }
+      if (totalSinExcusa % 3 === 0) {
+        if (Number(item.notificado_whatsapp || 0) > 0) {
+          return (
+            <span className="badge bg-success">
+              Notificado por WhatsApp
+            </span>
+          );
+        }
 
-      if (
-        Number(item.total_cartas_inasistencia || 0) > 0
-      ) {
+        if (Number(item.total_cartas_inasistencia || 0) > 0) {
+          return (
+            <span className="badge bg-success">
+              Carta generada
+            </span>
+          );
+        }
+
         return (
-          <span className="badge bg-success">
-            Carta generada
+          <span className="badge bg-danger">
+            Generar carta
           </span>
         );
       }
 
       return (
-        <span className="badge bg-danger">
-          Generar carta
+        <span className="badge bg-success">
+          Normal
         </span>
       );
   })()}
@@ -910,6 +914,7 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
 
 
 
