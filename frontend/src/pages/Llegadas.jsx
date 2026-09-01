@@ -10,6 +10,7 @@ function Llegadas() {
   const [reportesVer, setReportesVer] = useState(null);
   const [mostrarCarta, setMostrarCarta] = useState(false);
   const [estudianteCarta, setEstudianteCarta] = useState(null);
+  const [fechaCarta, setFechaCarta] = useState(null);
   const [estudiantes, setEstudiantes] = useState([]);
   const [busquedaEstudiante, setBusquedaEstudiante] = useState("");
   const [busquedaEstudianteEditar, setBusquedaEstudianteEditar] = useState("");
@@ -273,13 +274,29 @@ function Llegadas() {
     return Object.values(estudiantes).filter(
       (item) => {
         const total = Number(item.total_mes || 0);
-        const cartas =
-          Number(item.carta_generada || 0) +
-          Number(item.notificado_whatsapp || 0);
+
+        const cartasGeneradas = Number(
+          item.carta_generada || 0
+        );
+
+        const whatsappNotificado = Number(
+          item.notificado_whatsapp || 0
+        );
+
+        // Carta y WhatsApp atienden la MISMA alerta.
+        // Por eso no se deben sumar.
+        const alertasAtendidas = Math.max(
+          cartasGeneradas,
+          whatsappNotificado
+        );
+
+        const alertasGeneradas = Math.floor(
+          total / 3
+        );
 
         return (
           total >= 3 &&
-          Math.floor(total / 3) > cartas
+          alertasGeneradas > alertasAtendidas
         );
       }
     );
@@ -325,7 +342,9 @@ function Llegadas() {
         id_estudiante: item.id_estudiante,
         tipo: "llegada",
         numero_reporte: numeroReporte,
-        fecha_generacion: new Date().toISOString().split("T")[0],
+        fecha_generacion: item.fecha
+          ? String(item.fecha).substring(0, 10)
+          : new Date().toISOString().split("T")[0],
         archivo_pdf: null,
         observacion: "Notificado por WhatsApp",
       });
@@ -1113,6 +1132,12 @@ function Llegadas() {
                         estudiante
                       );
 
+                      setFechaCarta(
+                        estudiante?.fecha
+                          ? String(estudiante.fecha).substring(0, 10)
+                          : null
+                      );
+
                       setMostrarCarta(true);
                     }}
                   >
@@ -1137,6 +1162,7 @@ function Llegadas() {
           tipo="llegada"
           estudiante={estudianteCarta}
           total={estudianteCarta?.total_mes}
+          fechaLlegada={fechaCarta}
           onCerrar={() => { setMostrarCarta(false); cargarLlegadas(); }}
           onGenerarPDF={() => {}}
         />
@@ -1147,6 +1173,12 @@ function Llegadas() {
 }
 
 export default Llegadas;
+
+
+
+
+
+
 
 
 

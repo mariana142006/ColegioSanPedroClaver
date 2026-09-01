@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -9,7 +9,7 @@ import logoLlegadas from "../assets/logo-llegadas.png";
 
 import api from "../services/api";
 
-function CartaReporte({ tipo, estudiante, total, onCerrar, onGenerarPDF }) {
+function CartaReporte({ tipo, estudiante, total, fechaLlegada, onCerrar, onGenerarPDF }) {
   const [configuracion, setConfiguracion] = useState(null);
   const [numeroReporte, setNumeroReporte] = useState("");
   const [generando, setGenerando] = useState(false);
@@ -46,7 +46,12 @@ function CartaReporte({ tipo, estudiante, total, onCerrar, onGenerarPDF }) {
     return null;
   }
 
-  const fechaActual = new Date().toLocaleDateString("es-CO", {
+  const fechaBase =
+    tipo === "llegada" && fechaLlegada
+      ? new Date(`${fechaLlegada}T00:00:00`)
+      : new Date();
+
+  const fechaActual = fechaBase.toLocaleDateString("es-CO", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -104,7 +109,10 @@ function CartaReporte({ tipo, estudiante, total, onCerrar, onGenerarPDF }) {
 
         numero_reporte: numeroReporte,
 
-        fecha_generacion: new Date().toISOString().substring(0, 10),
+        fecha_generacion:
+          tipo === "llegada" && fechaLlegada
+            ? fechaLlegada
+            : new Date().toISOString().substring(0, 10),
 
         archivo_pdf: archivo,
 
@@ -156,7 +164,7 @@ function CartaReporte({ tipo, estudiante, total, onCerrar, onGenerarPDF }) {
       const carta = document.getElementById("carta-reporte");
 
       if (!carta) {
-        throw new Error("No se encontró la carta");
+        throw new Error("No se encontrÃ³ la carta");
       }
 
       const canvas = await html2canvas(carta, {
@@ -186,7 +194,7 @@ function CartaReporte({ tipo, estudiante, total, onCerrar, onGenerarPDF }) {
   };
 
   // ==========================================
-  // BOTÓN GENERAR CARTA
+  // BOTÃ“N GENERAR CARTA
   // ==========================================
 
   const manejarGenerarCarta = async () => {
@@ -295,7 +303,7 @@ function CartaReporte({ tipo, estudiante, total, onCerrar, onGenerarPDF }) {
                 </h5>
 
                 <p>
-                  <strong>Reporte N°:</strong> {numeroReporte}
+                  <strong>Reporte NÂ°:</strong> {numeroReporte}
                 </p>
               </div>
 
@@ -313,7 +321,7 @@ function CartaReporte({ tipo, estudiante, total, onCerrar, onGenerarPDF }) {
             <hr />
 
             {/* ================================= */}
-            {/* INFORMACIÓN ESTUDIANTE */}
+            {/* INFORMACIÃ“N ESTUDIANTE */}
             {/* ================================= */}
 
             <div
@@ -342,7 +350,7 @@ function CartaReporte({ tipo, estudiante, total, onCerrar, onGenerarPDF }) {
             <hr />
 
             {/* ================================= */}
-            {/* DESCRIPCIÓN */}
+            {/* DESCRIPCIÃ“N */}
             {/* ================================= */}
 
             <p
@@ -368,9 +376,9 @@ function CartaReporte({ tipo, estudiante, total, onCerrar, onGenerarPDF }) {
               }}
             >
               <div className="col">
-                {configuracion?.coordinador || "Coordinador Académico"}
+                {configuracion?.coordinador || "Coordinador AcadÃ©mico"}
                 <br />
-                Firma Coordinación
+                Firma CoordinaciÃ³n
               </div>
 
               <div className="col">
@@ -399,7 +407,7 @@ function CartaReporte({ tipo, estudiante, total, onCerrar, onGenerarPDF }) {
               onClick={manejarGenerarCarta}
               disabled={generando || !numeroReporte}
             >
-              {generando ? "Generando..." : "📄 Generar carta"}
+              {generando ? "Generando..." : "ðŸ“„ Generar carta"}
             </button>
           </div>
         </div>
@@ -409,3 +417,6 @@ function CartaReporte({ tipo, estudiante, total, onCerrar, onGenerarPDF }) {
 }
 
 export default CartaReporte;
+
+
+
