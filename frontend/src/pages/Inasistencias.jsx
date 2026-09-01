@@ -417,27 +417,61 @@ function Inasistencias() {
 
               <td>{item.observacion}</td>
               <td>
-  {Number(item.notificado_whatsapp || 0) > 0 ? (
-    <span className="badge bg-success">
-      Notificado por WhatsApp
-    </span>
-  ) : Number(item.total_cartas_inasistencia || 0) > 0 ? (
-    <span className="badge bg-success">
-      Carta generada
-    </span>
-  ) : Number(item.total_inasistencias || 0) >= 3 ? (
-    <span className="badge bg-danger">
-      Generar carta
-    </span>
-  ) : Number(item.total_inasistencias || 0) === 2 ? (
-    <span className="badge bg-warning text-dark">
-      Seguimiento
-    </span>
-  ) : (
+  {item.tipo !== "Sin excusa" ? (
     <span className="badge bg-success">
       Normal
     </span>
-  )}
+  ) : (() => {
+      const totalSinExcusa = Number(item.total_inasistencias || 0);
+
+      if (totalSinExcusa <= 0) {
+        return (
+          <span className="badge bg-success">
+            Normal
+          </span>
+        );
+      }
+
+      const posicion = totalSinExcusa % 3;
+
+      if (posicion === 1) {
+        return (
+          <span className="badge bg-success">
+            Normal
+          </span>
+        );
+      }
+
+      if (posicion === 2) {
+        return (
+          <span className="badge bg-warning text-dark">
+            Seguimiento
+          </span>
+        );
+      }
+
+      if (Number(item.notificado_whatsapp || 0) > 0) {
+        return (
+          <span className="badge bg-success">
+            Notificado por WhatsApp
+          </span>
+        );
+      }
+
+      if (Number(item.total_cartas_inasistencia || 0) > 0) {
+        return (
+          <span className="badge bg-success">
+            Carta generada
+          </span>
+        );
+      }
+
+      return (
+        <span className="badge bg-danger">
+          Generar carta
+        </span>
+      );
+  })()}
 </td>
 <td>
                 <button
@@ -839,6 +873,12 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
+
+
+
+
+
 
 
 

@@ -22,14 +22,12 @@ const obtenerInasistencias = async () => {
         FROM inasistencias i2
         WHERE i2.id_estudiante = i.id_estudiante
           AND i2.tipo = 'Sin excusa'
-          AND i2.fecha >= COALESCE(
-            (
-              SELECT MAX(c.fecha_generacion)
-              FROM cartas c
-              WHERE c.id_estudiante = i.id_estudiante
-                AND c.tipo = 'inasistencia'
-            ),
-            '1900-01-01'
+          AND (
+            i2.fecha < i.fecha
+            OR (
+              i2.fecha = i.fecha
+              AND i2.id_inasistencia <= i.id_inasistencia
+            )
           )
       ) AS total_inasistencias,
 
@@ -208,4 +206,5 @@ module.exports = {
   actualizarInasistencia,
   eliminarInasistencia,
 };
+
 
