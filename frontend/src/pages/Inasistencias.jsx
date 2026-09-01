@@ -235,54 +235,102 @@ function Inasistencias() {
   };
 
   const obtenerAlertas = () => {
-    // Una sola alerta por estudiante cuando el total de
-    // "Sin excusa" llega a un múltiplo de 3 y todavía
-    // no se ha generado carta ni notificado por WhatsApp.
+    const alertas = [];
 
-    const estudiantesProcesados = [];
+    // ==========================================
+    // AGRUPAR SIN EXCUSA POR ESTUDIANTE
+    // ==========================================
+    const estudiantesUnicos = [
+      ...new Set(
+        inasistencias
+          .filter(
+            (item) =>
+              String(item.tipo || "").trim().toLowerCase() ===
+              "sin excusa"
+          )
+          .map((item) => Number(item.id_estudiante))
+      ),
+    ];
 
-    inasistencias.forEach((item) => {
-      if (item.tipo !== "Sin excusa") {
+    estudiantesUnicos.forEach((idEstudiante) => {
+      const registrosSinExcusa = inasistencias
+        .filter(
+          (item) =>
+            Number(item.id_estudiante) === idEstudiante &&
+            String(item.tipo || "").trim().toLowerCase() ===
+              "sin excusa"
+        )
+        .sort(
+          (a, b) =>
+            new Date(a.fecha) - new Date(b.fecha) ||
+            Number(a.id_inasistencia) -
+              Number(b.id_inasistencia)
+        );
+
+      const totalSinExcusa = registrosSinExcusa.length;
+
+      // ==========================================
+      // 1 Y 2 -> NO HAY ALERTA
+      // 3 -> ALERTA
+      // 4 Y 5 -> SIGUE ALERTA DEL GRUPO 1
+      // 6 -> ALERTA DEL GRUPO 2
+      // ==========================================
+      if (totalSinExcusa < 3) {
         return;
       }
 
-      const registrosEstudiante = inasistencias.filter(
-        (registro) =>
-          Number(registro.id_estudiante) === Number(item.id_estudiante) &&
-          registro.tipo === "Sin excusa"
-      );
-
-      const totalSinExcusa = registrosEstudiante.length;
-
-      if (totalSinExcusa < 3 || totalSinExcusa % 3 !== 0) {
-        return;
-      }
-
-      const estudianteYaProcesado = estudiantesProcesados.find(
-        (estudiante) =>
-          Number(estudiante.id_estudiante) ===
-          Number(item.id_estudiante)
-      );
-
-      if (estudianteYaProcesado) {
-        return;
-      }
-
-      const totalCartas = Number(
-        item.total_cartas_inasistencia || 0
-      );
-
-      const totalNotificaciones = Number(
-        item.notificado_whatsapp || 0
-      );
-
-      const numeroCartaNecesaria = Math.floor(
+      const gruposCompletos = Math.floor(
         totalSinExcusa / 3
       );
 
+      const ultimoRegistro =
+        registrosSinExcusa[
+          registrosSinExcusa.length - 1
+        ];
+
+      const totalCartas = Number(
+        ultimoRegistro?.total_cartas_inasistencia || 0
+      );
+
+      const totalNotificaciones = Number(
+        ultimoRegistro?.notificado_whatsapp || 0
+      );
+
+      const gruposProcesados =
+        totalCartas + totalNotificaciones;
+
+      console.log(
+        "===== ALERTA INASISTENCIA ====="
+      );
+      console.log(
+        "ESTUDIANTE:",
+        idEstudiante
+      );
+      console.log(
+        "TOTAL SIN EXCUSA:",
+        totalSinExcusa
+      );
+      console.log(
+        "GRUPOS COMPLETOS:",
+        gruposCompletos
+      );
+      console.log(
+        "CARTAS:",
+        totalCartas
+      );
+      console.log(
+        "WHATSAPP:",
+        totalNotificaciones
+      );
+      console.log(
+        "GRUPOS PROCESADOS:",
+        gruposProcesados
+      );
+
+      // Si ya se procesaron todos los grupos,
+      // no mostrar alerta.
       if (
-        totalCartas + totalNotificaciones >=
-        numeroCartaNecesaria
+        gruposProcesados >= gruposCompletos
       ) {
         return;
       }
@@ -290,11 +338,20 @@ function Inasistencias() {
       const estudiante = estudiantes.find(
         (e) =>
           Number(e.id_estudiante) ===
-          Number(item.id_estudiante)
+          idEstudiante
       );
 
-      estudiantesProcesados.push({
-        ...item,
+      /*
+       * IMPORTANTE:
+       * La alerta utiliza el ÚLTIMO registro como
+       * representante del estudiante, pero la cantidad
+       * total corresponde a TODOS los Sin excusa.
+       *
+       * Por eso, cuando hay 3:
+       * los 3 registros pertenecen al grupo pendiente.
+       */
+      alertas.push({
+        ...ultimoRegistro,
         total_inasistencias: totalSinExcusa,
         telefono_acudiente:
           estudiante?.telefono_acudiente || "",
@@ -303,8 +360,14 @@ function Inasistencias() {
       });
     });
 
-    return estudiantesProcesados;
-  };  // ============================================================
+    console.log(
+      "===== ALERTAS FINALES ====="
+    );
+    console.log(alertas);
+
+    return alertas;
+  };
+  // ============================================================
   // NOTIFICAR ACUDIENTE POR WHATSAPP
   // ============================================================
   const notificarAcudienteWhatsApp = async (item) => {
@@ -997,6 +1060,9 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
+
+
 
 
 

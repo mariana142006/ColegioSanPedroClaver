@@ -37,12 +37,6 @@ const obtenerInasistencias = async () => {
         WHERE c.id_estudiante = i.id_estudiante
           AND c.tipo = 'inasistencia'
           AND c.observacion NOT LIKE 'Notificado por WhatsApp%'
-          AND c.id_carta = (
-            SELECT MAX(c2.id_carta)
-            FROM cartas c2
-            WHERE c2.id_estudiante = i.id_estudiante
-              AND c2.tipo = 'inasistencia'
-          )
       ) AS total_cartas_inasistencia,
 
       (
@@ -51,12 +45,6 @@ const obtenerInasistencias = async () => {
         WHERE c.id_estudiante = i.id_estudiante
           AND c.tipo = 'inasistencia'
           AND c.observacion LIKE 'Notificado por WhatsApp%'
-          AND c.id_carta = (
-            SELECT MAX(c2.id_carta)
-            FROM cartas c2
-            WHERE c2.id_estudiante = i.id_estudiante
-              AND c2.tipo = 'inasistencia'
-          )
       ) AS notificado_whatsapp,
 
       (
@@ -206,5 +194,3 @@ module.exports = {
   actualizarInasistencia,
   eliminarInasistencia,
 };
-
-
