@@ -422,9 +422,25 @@ function Inasistencias() {
       Normal
     </span>
   ) : (() => {
-      const totalSinExcusa = Number(item.total_inasistencias || 0);
+      const registrosSinExcusa = inasistencias
+        .filter(
+          (registro) =>
+            registro.id_estudiante === item.id_estudiante &&
+            registro.tipo === "Sin excusa"
+        )
+        .sort(
+          (a, b) =>
+            new Date(a.fecha) - new Date(b.fecha) ||
+            Number(a.id_inasistencia) - Number(b.id_inasistencia)
+        );
 
-      if (totalSinExcusa <= 0) {
+      const posicion =
+        registrosSinExcusa.findIndex(
+          (registro) =>
+            registro.id_inasistencia === item.id_inasistencia
+        ) + 1;
+
+      if (posicion <= 0) {
         return (
           <span className="badge bg-success">
             Normal
@@ -432,9 +448,7 @@ function Inasistencias() {
         );
       }
 
-      const posicion = totalSinExcusa % 3;
-
-      if (posicion === 1) {
+      if (posicion % 3 === 1) {
         return (
           <span className="badge bg-success">
             Normal
@@ -442,7 +456,7 @@ function Inasistencias() {
         );
       }
 
-      if (posicion === 2) {
+      if (posicion % 3 === 2) {
         return (
           <span className="badge bg-warning text-dark">
             Seguimiento
@@ -873,6 +887,7 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
 
 
 
