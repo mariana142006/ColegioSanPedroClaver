@@ -193,43 +193,76 @@ function Inasistencias() {
   };
 
   const obtenerAlertas = () => {
-    // SOLO "Sin excusa" puede generar una alerta.
-    const alertas = inasistencias.filter(
-      (item) =>
-        item.tipo === "Sin excusa" &&
-        Number(item.total_inasistencias) >= 3 &&
-        Math.floor(Number(item.total_inasistencias || 0) / 3) >
-          (
-            Number(item.total_cartas_inasistencia || 0) +
-            Number(item.notificado_whatsapp || 0)
-          )
-    );
+    // Una sola alerta por estudiante cuando el total de
+    // "Sin excusa" llega a un múltiplo de 3 y todavía
+    // no se ha generado carta ni notificado por WhatsApp.
 
-    const estudiantesUnicos = [];
+    const estudiantesProcesados = [];
 
-    alertas.forEach((item) => {
-      const existe = estudiantesUnicos.find(
-        (estudiante) =>
-          Number(estudiante.id_estudiante) === Number(item.id_estudiante)
+    inasistencias.forEach((item) => {
+      if (item.tipo !== "Sin excusa") {
+        return;
+      }
+
+      const registrosEstudiante = inasistencias.filter(
+        (registro) =>
+          Number(registro.id_estudiante) === Number(item.id_estudiante) &&
+          registro.tipo === "Sin excusa"
       );
 
-      if (!existe) {
-        const estudiante = estudiantes.find(
-          (e) =>
-            Number(e.id_estudiante) === Number(item.id_estudiante)
-        );
+      const totalSinExcusa = registrosEstudiante.length;
 
-        estudiantesUnicos.push({
-          ...item,
-          telefono_acudiente: estudiante?.telefono_acudiente || "",
-          nombre_acudiente: estudiante?.nombre_acudiente || "",
-        });
+      if (totalSinExcusa < 3 || totalSinExcusa % 3 !== 0) {
+        return;
       }
+
+      const estudianteYaProcesado = estudiantesProcesados.find(
+        (estudiante) =>
+          Number(estudiante.id_estudiante) ===
+          Number(item.id_estudiante)
+      );
+
+      if (estudianteYaProcesado) {
+        return;
+      }
+
+      const totalCartas = Number(
+        item.total_cartas_inasistencia || 0
+      );
+
+      const totalNotificaciones = Number(
+        item.notificado_whatsapp || 0
+      );
+
+      const numeroCartaNecesaria = Math.floor(
+        totalSinExcusa / 3
+      );
+
+      if (
+        totalCartas + totalNotificaciones >=
+        numeroCartaNecesaria
+      ) {
+        return;
+      }
+
+      const estudiante = estudiantes.find(
+        (e) =>
+          Number(e.id_estudiante) ===
+          Number(item.id_estudiante)
+      );
+
+      estudiantesProcesados.push({
+        ...item,
+        total_inasistencias: totalSinExcusa,
+        telefono_acudiente:
+          estudiante?.telefono_acudiente || "",
+        nombre_acudiente:
+          estudiante?.nombre_acudiente || "",
+      });
     });
 
-    return estudiantesUnicos;
-  };
-  // ============================================================
+    return estudiantesProcesados;
+  };  // ============================================================
   // NOTIFICAR ACUDIENTE POR WHATSAPP
   // ============================================================
   const notificarAcudienteWhatsApp = async (item) => {
@@ -422,25 +455,17 @@ function Inasistencias() {
       Normal
     </span>
   ) : (() => {
-      const registrosSinExcusa = inasistencias
-        .filter(
-          (registro) =>
-            registro.id_estudiante === item.id_estudiante &&
-            registro.tipo === "Sin excusa"
-        )
-        .sort(
-          (a, b) =>
-            new Date(a.fecha) - new Date(b.fecha) ||
-            Number(a.id_inasistencia) - Number(b.id_inasistencia)
-        );
+      const registrosSinExcusa = inasistencias.filter(
+        (registro) =>
+          Number(registro.id_estudiante) ===
+            Number(item.id_estudiante) &&
+          registro.tipo === "Sin excusa"
+      );
 
-      const posicion =
-        registrosSinExcusa.findIndex(
-          (registro) =>
-            registro.id_inasistencia === item.id_inasistencia
-        ) + 1;
+      const totalSinExcusa = registrosSinExcusa.length;
 
-      if (posicion <= 0) {
+      // 1 Sin excusa → Normal
+      if (totalSinExcusa < 2) {
         return (
           <span className="badge bg-success">
             Normal
@@ -448,15 +473,8 @@ function Inasistencias() {
         );
       }
 
-      if (posicion % 3 === 1) {
-        return (
-          <span className="badge bg-success">
-            Normal
-          </span>
-        );
-      }
-
-      if (posicion % 3 === 2) {
+      // 2 Sin excusa → Seguimiento
+      if (totalSinExcusa % 3 === 2) {
         return (
           <span className="badge bg-warning text-dark">
             Seguimiento
@@ -464,7 +482,10 @@ function Inasistencias() {
         );
       }
 
-      if (Number(item.notificado_whatsapp || 0) > 0) {
+      // 3, 6, 9... → Generar carta
+      if (
+        Number(item.notificado_whatsapp || 0) > 0
+      ) {
         return (
           <span className="badge bg-success">
             Notificado por WhatsApp
@@ -472,7 +493,9 @@ function Inasistencias() {
         );
       }
 
-      if (Number(item.total_cartas_inasistencia || 0) > 0) {
+      if (
+        Number(item.total_cartas_inasistencia || 0) > 0
+      ) {
         return (
           <span className="badge bg-success">
             Carta generada
@@ -887,6 +910,8 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
+
 
 
 
