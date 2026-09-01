@@ -18,6 +18,8 @@ const obtenerLlegadas = async () => {
       e.nombres,
       e.documento,
       e.grado,
+      e.telefono_acudiente,
+      e.nombre_acudiente,
 
       (
         SELECT COUNT(*)
@@ -456,6 +458,7 @@ module.exports = {
   actualizarTotalesMes,
   marcarAlertaRevisada,
 };
+
 
 
 

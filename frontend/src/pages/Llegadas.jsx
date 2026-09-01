@@ -257,28 +257,31 @@ function Llegadas() {
   // OBTENER ALERTAS
   // ==========================================
   const obtenerAlertas = () => {
-    const conteo = {};
+    const estudiantes = {};
 
     llegadas.forEach((item) => {
       const id = item.id_estudiante;
 
-      if (!conteo[id]) {
-        conteo[id] = {
+      if (!estudiantes[id]) {
+        estudiantes[id] = {
           ...item,
-          total_llegadas: 0,
+          total_llegadas: Number(item.total_mes || 0),
         };
       }
-
-      conteo[id].total_llegadas++;
     });
 
-    return Object.values(conteo).filter(
-      (item) =>
-        Math.floor(Number(item.total_llegadas || 0) / 3) >
-        (
+    return Object.values(estudiantes).filter(
+      (item) => {
+        const total = Number(item.total_mes || 0);
+        const cartas =
           Number(item.carta_generada || 0) +
-          Number(item.notificado_whatsapp || 0)
-        )
+          Number(item.notificado_whatsapp || 0);
+
+        return (
+          total >= 3 &&
+          Math.floor(total / 3) > cartas
+        );
+      }
     );
   };
   // ============================================================
@@ -721,7 +724,8 @@ function Llegadas() {
               </td>
 
               <td>
-  {Number(llegada.notificado_whatsapp || 0) > 0 ? (
+                {Number(llegada.total_mes || 0) >= 3 ? (
+  Number(llegada.notificado_whatsapp || 0) > 0 ? (
     <span className="badge bg-success">
       Notificado por WhatsApp
     </span>
@@ -729,20 +733,22 @@ function Llegadas() {
     <span className="badge bg-success">
       Carta generada
     </span>
-  ) : Number(llegada.total_mes || 0) >= 3 ? (
+  ) : (
     <span className="badge bg-danger">
       Generar carta
     </span>
-  ) : Number(llegada.total_mes || 0) === 2 ? (
-    <span className="badge bg-warning text-dark">
-      Seguimiento
-    </span>
-  ) : (
-    <span className="badge bg-success">
-      Normal
-    </span>
-  )}
+  )
+) : Number(llegada.total_mes || 0) === 2 ? (
+  <span className="badge bg-warning text-dark">
+    Seguimiento
+  </span>
+) : (
+  <span className="badge bg-success">
+    Normal
+  </span>
+)}
 </td>
+
 <td>
 
                 <button
@@ -1141,6 +1147,10 @@ function Llegadas() {
 }
 
 export default Llegadas;
+
+
+
+
 
 
 
