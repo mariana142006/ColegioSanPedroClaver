@@ -174,7 +174,7 @@ fecha,
       const carta = document.getElementById("carta-reporte");
 
       if (!carta) {
-        throw new Error("No se encontrÃ³ la carta");
+        throw new Error("No se encontro la carta");
       }
 
       const canvas = await html2canvas(carta, {
@@ -204,7 +204,7 @@ fecha,
   };
 
   // ==========================================
-  // BOTÃ“N GENERAR CARTA
+  //   // BOTON GENERAR CARTA
   // ==========================================
 
   const manejarGenerarCarta = async () => {
@@ -313,7 +313,7 @@ fecha,
                 </h5>
 
                 <p>
-                  <strong>Reporte NÂ°:</strong> {numeroReporte}
+                  <strong>Reporte N°:</strong> {numeroReporte}
                 </p>
               </div>
 
@@ -331,7 +331,7 @@ fecha,
             <hr />
 
             {/* ================================= */}
-            {/* INFORMACIÃ“N ESTUDIANTE */}
+            {/* INFORMACION ESTUDIANTE */}
             {/* ================================= */}
 
             <div
@@ -360,7 +360,7 @@ fecha,
             <hr />
 
             {/* ================================= */}
-            {/* DESCRIPCIÃ“N */}
+            {/* DESCRIPCION */}
             {/* ================================= */}
 
             <p
@@ -386,9 +386,9 @@ fecha,
               }}
             >
               <div className="col">
-                {configuracion?.coordinador || "Coordinador AcadÃ©mico"}
+                {configuracion?.coordinador || "Coordinador Academico"}
                 <br />
-                Firma CoordinaciÃ³n
+                Firma Coordinacion
               </div>
 
               <div className="col">
@@ -417,7 +417,7 @@ fecha,
               onClick={manejarGenerarCarta}
               disabled={generando || !numeroReporte}
             >
-              {generando ? "Generando..." : "ðŸ“„ Generar carta"}
+              {generando ? "Generando..." : "Generar carta"}
             </button>
           </div>
         </div>
@@ -427,6 +427,7 @@ fecha,
 }
 
 export default CartaReporte;
+
 
 
 
