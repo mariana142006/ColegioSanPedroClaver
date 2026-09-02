@@ -1,4 +1,4 @@
-ï»¿const Carta = require("../models/CartaModel");
+const Carta = require("../models/CartaModel");
 
 // ==========================================
 // LISTAR CARTAS
@@ -21,7 +21,7 @@ const listarCartas = async (req, res) => {
 };
 
 // ==========================================
-// GUARDAR CARTA / NOTIFICACIÃ“N
+// GUARDAR CARTA / NOTIFICACIÓN
 // ==========================================
 const guardarCarta = async (req, res) => {
   try {
@@ -46,7 +46,7 @@ const guardarCarta = async (req, res) => {
       });
     }
 
-    if (!grupo_alerta) {
+    if ((tipo === "llegada" || tipo === "uniforme") && !grupo_alerta) {
       return res.status(400).json({
         mensaje: "Falta grupo_alerta.",
       });
@@ -72,7 +72,7 @@ const guardarCarta = async (req, res) => {
 
     const resultado = await Carta.crearCarta(req.body);
 
-    console.log("CARTA / NOTIFICACIÃ“N GUARDADA CORRECTAMENTE");
+    console.log("CARTA / NOTIFICACIÓN GUARDADA CORRECTAMENTE");
     console.log("ID generado:", resultado.insertId);
     console.log("Grupo de alerta:", grupo_alerta);
 
@@ -86,7 +86,7 @@ const guardarCarta = async (req, res) => {
     console.error("==========================================");
     console.error("ERROR GUARDANDO CARTA");
     console.error("Mensaje:", error.message);
-    console.error("CÃ³digo:", error.code);
+    console.error("Código:", error.code);
     console.error("SQL:", error.sql);
     console.error("==========================================");
 
@@ -98,20 +98,20 @@ const guardarCarta = async (req, res) => {
 };
 
 // ==========================================
-// OBTENER NÃšMERO DE REPORTE
+// OBTENER NÚMERO DE REPORTE
 // ==========================================
 const obtenerNumeroReporte = async (req, res) => {
   try {
     const numero = await Carta.obtenerSiguienteNumero();
 
-    console.log("Siguiente nÃºmero de reporte:", numero);
+    console.log("Siguiente número de reporte:", numero);
 
     res.json({
       numero,
     });
 
   } catch (error) {
-    console.error("ERROR OBTENIENDO NÃšMERO:", error);
+    console.error("ERROR OBTENIENDO NÚMERO:", error);
 
     res.status(500).json({
       mensaje: error.message,
@@ -128,7 +128,7 @@ const eliminarCarta = async (req, res) => {
 
     if (!id) {
       return res.status(400).json({
-        mensaje: "No se recibiÃ³ el ID del reporte.",
+        mensaje: "No se recibió el ID del reporte.",
       });
     }
 
@@ -159,3 +159,5 @@ module.exports = {
   obtenerNumeroReporte,
   eliminarCarta,
 };
+
+

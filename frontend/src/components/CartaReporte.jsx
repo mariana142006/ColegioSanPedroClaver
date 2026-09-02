@@ -105,7 +105,10 @@ function CartaReporte({ tipo, estudiante, total, fechaLlegada, grupoAlerta, onCe
       const respuesta = await api.post("/cartas", {
         id_estudiante: estudiante.id_estudiante,
 
-        grupo_alerta: tipo === "llegada" ? grupoAlerta : null,
+        grupo_alerta:
+          tipo === "llegada" || tipo === "uniforme"
+            ? Number(grupoAlerta)
+            : null,
 
         tipo,
 
@@ -147,7 +150,10 @@ function CartaReporte({ tipo, estudiante, total, fechaLlegada, grupoAlerta, onCe
         id_estudiante: estudiante.id_estudiante,
 
         
-        grupo_alerta: tipo === "llegada" ? grupoAlerta : null,
+        grupo_alerta:
+          tipo === "llegada" || tipo === "uniforme"
+            ? Number(grupoAlerta)
+            : null,
 fecha,
       });
 
@@ -421,6 +427,7 @@ fecha,
 }
 
 export default CartaReporte;
+
 
 
 
