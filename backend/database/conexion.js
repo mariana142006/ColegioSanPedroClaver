@@ -1,4 +1,4 @@
-const mysql = require("mysql2/promise");
+﻿const mysql = require("mysql2/promise");
 require("dotenv").config();
 
 
@@ -10,7 +10,8 @@ const conexion = mysql.createPool({
     port: process.env.DB_PORT,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    dateStrings: true
 });
 
 

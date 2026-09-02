@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 import "../styles/usuarios.css";
 import Swal from "sweetalert2";
@@ -716,17 +716,8 @@ function Llegadas() {
 
               <td>
                 {llegada.fecha
-                  ? new Date(
-                      llegada.fecha
-                    ).toLocaleDateString(
-                      "es-CO",
-                      {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      }
-                    )
-                  : "Sin fecha"}
+  ? String(llegada.fecha).substring(0, 10).split("-").reverse().join("/")
+  : "Sin fecha"}
               </td>
 
               {/* IMPORTANTE:

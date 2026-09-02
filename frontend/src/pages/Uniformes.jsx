@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 import Swal from "sweetalert2";
 import { FaEdit, FaTrash } from "react-icons/fa";
@@ -471,11 +471,11 @@ const cargarUniformes = async () => {
                 <td>{item.grado}</td>
 
                 <td>
-                  {new Date(item.fecha).toLocaleDateString("es-CO", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })}
+                  {item.fecha
+                    ? String(item.fecha).substring(0, 10).split("-").reverse().join("/")
+
+
+                    : ""}
                 </td>
 
                 <td>{item.motivo}</td>

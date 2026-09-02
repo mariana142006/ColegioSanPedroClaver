@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import api from "../services/api";
 
@@ -63,7 +63,7 @@ function Inasistencias() {
   });
 
   // ==========================================
-  // PAGINACIÓN DE RESULTADOS FILTRADOS
+  // PAGINACION DE RESULTADOS FILTRADOS
   // ==========================================
   const totalPaginas = Math.ceil(
     inasistenciasFiltradas.length / inasistenciasPorPagina
@@ -150,7 +150,7 @@ function Inasistencias() {
 
       Swal.fire({
         title: editar ? "Actualizado" : "Registrado",
-        text: editar ? "La inasistencia se actualizó correctamente." : "La inasistencia se registró correctamente.",
+        text: editar ? "La inasistencia se actualizo correctamente." : "La inasistencia se registro correctamente.",
         icon: "success",
         confirmButtonText: "OK"
       });
@@ -277,7 +277,7 @@ function Inasistencias() {
         totalSinExcusa / 3
       );
 
-      // Tomamos el último registro solamente para
+      // Tomamos el ultimo registro solamente para
       // conservar los datos del estudiante.
       const ultimoRegistro =
         registrosSinExcusa[
@@ -293,7 +293,7 @@ function Inasistencias() {
        * IMPORTANTE:
        *
        * La alerta debe aparecer cuando exista por lo menos
-       * un grupo completo de 3 que todavía no haya sido
+       * un grupo completo de 3 que todavia no haya sido
        * procesado.
        *
        * Para 3 registros:
@@ -345,7 +345,7 @@ function Inasistencias() {
     if (!item.telefono_acudiente) {
       Swal.fire(
         "Sin telefono",
-        "Este estudiante no tiene registrado un número de acudiente.",
+        "Este estudiante no tiene registrado un numero de acudiente.",
         "warning"
       );
       return;
@@ -358,11 +358,11 @@ function Inasistencias() {
     }
 
     const mensaje =
-      `Cordial saludo, ${item.nombre_acudiente || "señor(a) acudiente"}. ` +
+      `Cordial saludo, ${item.nombre_acudiente || "senor(a) acudiente"}. ` +
       `Nos permitimos informarle que el estudiante ${item.nombres}, ` +
       `del grado ${item.grado}, ha acumulado ${item.total_inasistencias} ` +
       `inasistencias. ` +
-      `Agradecemos su atención y acompañamiento para fortalecer ` +
+      `Agradecemos su atencion y acompanamiento para fortalecer ` +
       `la asistencia del estudiante al Colegio San Pedro Claver.`;
 
     const url =
@@ -393,15 +393,15 @@ function Inasistencias() {
       await cargarInasistencias();
 
       Swal.fire({
-        title: "Notificación realizada",
-        text: "Se notificó al acudiente por WhatsApp y el reporte fue registrado.",
+        title: "Notificacion realizada",
+        text: "Se notifico al acudiente por WhatsApp y el reporte fue registrado.",
         icon: "success",
         timer: 1800,
         showConfirmButton: false,
       });
     } catch (error) {
       console.error(
-        "Error registrando notificación por WhatsApp:",
+        "Error registrando notificacion por WhatsApp:",
         error
       );
 
@@ -411,14 +411,14 @@ function Inasistencias() {
 
       Swal.fire(
         "Error",
-        "No se pudo registrar la notificación en el sistema.",
+        "No se pudo registrar la notificacion en el sistema.",
         "error"
       );
     }
   };
   return (
     <div className="usuarios-container">
-      <h2 className="fw-bold">Gestión de Inasistencias</h2>
+      <h2 className="fw-bold">Gestion de Inasistencias</h2>
 
       <button
         className="btn btn-naranja mb-3"
@@ -499,7 +499,7 @@ function Inasistencias() {
 
             <th>Tipo</th>
 
-            <th>Observación</th>
+            <th>Observacion</th>
 
             <th>Estado</th>
 
@@ -516,11 +516,9 @@ function Inasistencias() {
               <td>{item.grado}</td>
 
               <td>
-                {new Date(item.fecha).toLocaleDateString("es-CO", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                })}
+                {item.fecha
+                  ? String(item.fecha).substring(0, 10).split("-").reverse().join("/")
+                  : ""}
               </td>
 
               <td>{item.tipo}</td>
@@ -585,7 +583,7 @@ function Inasistencias() {
                      * Cuando llegan 6:
                      * 4, 5 y 6 -> Generar carta
                      *
-                     * Y así sucesivamente.
+                     * Y asi sucesivamente.
                      */
 
                     const grupo =
@@ -623,7 +621,7 @@ function Inasistencias() {
                     }
 
                     /*
-                     * El grupo todavía está incompleto.
+                     * El grupo todavia esta incompleto.
                      */
                     const posicionEnGrupo =
                       posicion - inicioGrupo + 1;
@@ -685,7 +683,7 @@ function Inasistencias() {
           </button>
 
           <span className="fw-bold">
-            Página {paginaActual} de {totalPaginas || 1}
+            Pagina {paginaActual} de {totalPaginas || 1}
           </span>
 
           <button
@@ -858,7 +856,7 @@ function Inasistencias() {
                           );
                         }).length === 0 && (
                           <div className="text-center text-muted p-3">
-                            No se encontró ningún estudiante.
+                            No se encontro ningun estudiante.
                           </div>
                         )}
 
@@ -916,15 +914,15 @@ function Inasistencias() {
                     </option>
                   </select>
 
-                  {/* DESCRIPCIÓN */}
+                  {/* DESCRIPCION */}
                   <label className="form-label fw-bold">
-                    Descripción
+                    Descripcion
                   </label>
 
                   <textarea
                     className="form-control mb-3"
                     name="observacion"
-                    placeholder="Escriba una descripción..."
+                    placeholder="Escriba una descripcion..."
                     value={formulario.observacion}
                     onChange={manejarCambio}
                     rows="3"
@@ -988,8 +986,8 @@ function Inasistencias() {
                       <br />
                       <strong>Tipo:</strong> {item.tipo}
                       <br />
-                      <strong>Observación:</strong>{" "}
-                      {item.observacion || "Sin observación"}
+                      <strong>Observacion:</strong>{" "}
+                      {item.observacion || "Sin observacion"}
                     </div>
                   ))}
 
@@ -1005,7 +1003,7 @@ function Inasistencias() {
                       if (!estudiante) {
                         Swal.fire(
                           "Error",
-                          "No se encontró el estudiante",
+                          "No se encontro el estudiante",
                           "error",
                         );
 
@@ -1043,6 +1041,7 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
 
 
 
