@@ -193,16 +193,19 @@ fecha,
 
       const nombreArchivo = `${titulo}.pdf`;
 
-      pdf.save(nombreArchivo);
+      const pdfBlob = pdf.output("blob");
+      const pdfUrl = URL.createObjectURL(pdfBlob);
 
-      return nombreArchivo;
+      return {
+        nombreArchivo,
+        pdfUrl,
+      };
     } catch (error) {
       console.log("Error generando PDF:", error);
 
       throw error;
     }
   };
-
   // ==========================================
   //   // BOTON GENERAR CARTA
   // ==========================================
@@ -215,36 +218,68 @@ fecha,
     try {
       setGenerando(true);
 
-      // 1. Generar PDF
-      const archivo = await generarPDF();
+      // 1. Generar PDF sin descargarlo
+      const resultadoPDF = await generarPDF();
 
-      // 2. Guardar carta en BD
-      const cartaGuardada = await guardarCarta(archivo);
+      // 2. Abrir el PDF en una nueva pestaña
+      const ventanaPDF = window.open(resultadoPDF.pdfUrl, "_blank");
+
+      // 3. Guardar carta en BD
+      const cartaGuardada = await guardarCarta(resultadoPDF.nombreArchivo);
 
       if (!cartaGuardada) {
         throw new Error("No se pudo guardar la carta");
       }
 
-      // 3. Marcar alerta como revisada
+      // 4. Marcar alerta como revisada
       await marcarAlertaRevisada();
 
-      // 4. Avisar al componente padre
+      // 5. Avisar al componente padre
       if (onGenerarPDF) {
         onGenerarPDF();
       }
 
-      alert("Carta generada y guardada correctamente.");
+      // 6. Abrir WhatsApp con el acudiente
+      if (!estudiante.telefono_acudiente) {
+        alert(
+          "La carta fue generada correctamente, pero el estudiante no tiene registrado un telefono de acudiente."
+        );
+      } else {
+        let telefono = String(estudiante.telefono_acudiente).replace(/\D/g, "");
+
+        if (telefono.length === 10 && telefono.startsWith("3")) {
+          telefono = "57" + telefono;
+        }
+
+        const mensaje =
+          `Cordial saludo, ${estudiante.nombre_acudiente || "senor(a) acudiente"}. ` +
+          `Nos permitimos informarle que el estudiante ${estudiante.nombres}, ` +
+          `del grado ${estudiante.grado}, tiene un reporte registrado en el sistema ` +
+          `institucional. Adjuntamos la carta correspondiente para su conocimiento ` +
+          `y seguimiento. ` +
+          `Agradecemos su atencion y acompanamiento al estudiante.`;
+
+        const url =
+          `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+
+        window.open(url, "_blank");
+      }
+
+      alert(
+        "Carta generada correctamente. Se abrio el PDF y WhatsApp para realizar la notificacion."
+      );
 
       onCerrar();
+
+
     } catch (error) {
-      console.log(error);
+      console.log("Error:", error);
 
       alert("No se pudo generar la carta.");
     } finally {
       setGenerando(false);
     }
   };
-
   return (
     <div className="modal d-block bg-dark bg-opacity-50">
       <div className="modal-dialog modal-lg">
@@ -417,7 +452,7 @@ fecha,
               onClick={manejarGenerarCarta}
               disabled={generando || !numeroReporte}
             >
-              {generando ? "Generando..." : "Generar carta"}
+              {generando ? "Generando..." : "Notificar acudiente por WhatsApp"}
             </button>
           </div>
         </div>
