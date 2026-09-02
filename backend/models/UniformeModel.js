@@ -11,6 +11,7 @@ const obtenerUniformes = async () => {
       u.fecha,
       u.motivo,
       u.observacion,
+      u.grupo_alerta,
       u.genero_alerta,
 
       e.nombres,
@@ -28,13 +29,25 @@ const obtenerUniformes = async () => {
         FROM cartas c
         WHERE c.id_estudiante = u.id_estudiante
           AND c.tipo = 'uniforme'
+          AND c.grupo_alerta = u.grupo_alerta
+          AND c.observacion NOT LIKE 'Notificado por WhatsApp%'
       ) AS carta_generada,
+
+      (
+        SELECT COUNT(*)
+        FROM cartas c
+        WHERE c.id_estudiante = u.id_estudiante
+          AND c.tipo = 'uniforme'
+          AND c.grupo_alerta = u.grupo_alerta
+          AND c.observacion LIKE 'Notificado por WhatsApp%'
+      ) AS notificado_whatsapp,
 
       (
         SELECT c.observacion
         FROM cartas c
         WHERE c.id_estudiante = u.id_estudiante
           AND c.tipo = 'uniforme'
+          AND c.grupo_alerta = u.grupo_alerta
         ORDER BY c.id_carta DESC
         LIMIT 1
       ) AS ultima_observacion_carta
@@ -61,6 +74,30 @@ const crearUniforme = async (datos) => {
     observacion,
   } = datos;
 
+  // Contar cuántos uniformes tiene actualmente
+  const [conteo] = await conexion.query(
+    `
+      SELECT COUNT(*) AS total
+      FROM uniforme
+      WHERE id_estudiante = ?
+    `,
+    [id_estudiante],
+  );
+
+  // Este será el número de este nuevo reporte
+  const totalUniforme = Number(conteo[0].total) + 1;
+
+  // Cada grupo contiene 3 registros:
+  // 1,2,3   -> grupo 1
+  // 4,5,6   -> grupo 2
+  // 7,8,9   -> grupo 3
+  // etc.
+  const grupoAlerta = Math.ceil(totalUniforme / 3);
+
+  // Solo el tercer registro del grupo genera alerta
+  const posicionGrupo = ((totalUniforme - 1) % 3) + 1;
+  const generaAlerta = posicionGrupo === 3 ? 1 : 0;
+
   const [resultado] = await conexion.query(
     `
       INSERT INTO uniforme
@@ -69,16 +106,18 @@ const crearUniforme = async (datos) => {
         fecha,
         motivo,
         observacion,
+        grupo_alerta,
         genero_alerta
       )
-      VALUES (?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?)
     `,
     [
       id_estudiante,
       fecha,
       motivo,
       observacion || null,
-      0,
+      grupoAlerta,
+      generaAlerta,
     ],
   );
 
@@ -136,4 +175,3 @@ module.exports = {
   actualizarUniforme,
   eliminarUniforme,
 };
-
