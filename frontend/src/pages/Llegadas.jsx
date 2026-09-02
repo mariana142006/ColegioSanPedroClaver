@@ -21,13 +21,13 @@ function Llegadas() {
   const [busqueda, setBusqueda] = useState("");
 
 
-  const [paginaActual, setPaginaActual] = useState(1);
+  const [PáginaActual, setPáginaActual] = useState(1);
 
-  const llegadasPorPagina = 10;
+  const llegadasPorPágina = 10;
   const [formulario, setFormulario] = useState({
     id_estudiante: "",
     fecha: "",
-    observacion: "",
+    Observación: "",
   });
 
   // ==========================================
@@ -79,17 +79,17 @@ function Llegadas() {
     );
   });
 
-  const totalPaginas = Math.ceil(
-    llegadas.length / llegadasPorPagina,
+  const totalPáginas = Math.ceil(
+    llegadas.length / llegadasPorPágina,
   );
 
   const indiceInicial =
-    (paginaActual - 1) * llegadasPorPagina;
+    (PáginaActual - 1) * llegadasPorPágina;
 
   const indiceFinal =
-    indiceInicial + llegadasPorPagina;
+    indiceInicial + llegadasPorPágina;
 
-  const llegadasPagina = llegadasFiltradas.slice(
+  const llegadasPágina = llegadasFiltradas.slice(
     indiceInicial,
     indiceFinal,
   );
@@ -142,7 +142,7 @@ function Llegadas() {
       setFormulario({
         id_estudiante: "",
         fecha: "",
-        observacion: "",
+        Observación: "",
       });
 
       setBusquedaEstudiante("");
@@ -199,7 +199,7 @@ function Llegadas() {
   // ==========================================
   const eliminarLlegada = async (id) => {
     const resultado = await Swal.fire({
-      title: "¿Eliminar registro?",
+      title: "Eliminar registro?",
       text: "Esta acción no se puede deshacer",
       icon: "warning",
       showCancelButton: true,
@@ -294,7 +294,7 @@ function Llegadas() {
         Number(item.notificado_whatsapp || 0) > 0;
 
       // Carta y WhatsApp atienden la misma alerta.
-      // Si ninguna de las dos acciones se ha realizado,
+      // Si ningúna de las dos acciónes se ha realizado,
       // la alerta debe aparecer.
       return !cartaGenerada && !whatsappNotificado;
     });
@@ -303,7 +303,7 @@ function Llegadas() {
   // NOTIFICAR ACUDIENTE POR WHATSAPP
   // ============================================================
   const notificarAcudienteWhatsApp = async (item) => {
-    if (!item.telefono_acudiente) {
+    if (!item.teléfono_acudiente) {
       Swal.fire(
         "Sin teléfono",
         "Este estudiante no tiene registrado un número de acudiente.",
@@ -312,40 +312,37 @@ function Llegadas() {
       return;
     }
 
-    let telefono = String(item.telefono_acudiente).replace(/\D/g, "");
+    let teléfono = String(item.teléfono_acudiente).replace(/\D/g, "");
 
-    if (telefono.length === 10 && telefono.startsWith("3")) {
-      telefono = "57" + telefono;
+    if (teléfono.length === 10 && teléfono.startsWith("3")) {
+      teléfono = "57" + teléfono;
     }
 
     const mensaje =
-      `Cordial saludo, ${item.nombre_acudiente || "señor(a) acudiente"}. ` +
-      `Nos permitimos informarle que el estudiante ${item.nombres}, ` +
-      `del grado ${item.grado}, ha acumulado ${item.total_llegadas} ` +
-      `llegadas tarde. ` +
-      `Agradecemos su atención y acompañamiento en el cumplimiento ` +
-      `de los horarios de ingreso al Colegio San Pedro Claver.`;
-
-    const url =
-      `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+      `cordial saludo padre de familia ${item.nombre_acudiente || "acudiente"}, ` +
+      `nos permitimos informarle que el estudiante ${item.nombres}, ` +
+      `del grado, ${item.grado}, ha acumulado ${item.total_llegadas} llegadas tarde, ` +
+      `agradecemos su atencion y cumplimiento del ingreso al colegio San Pedro Claver a las 6:20 am, ` +
+      `muchas gracias por su atencion.`;    const url =
+      `https://wa.me/${teléfono}?text=${encodeURIComponent(mensaje)}`;
 
     const ventanaWhatsApp = window.open("about:blank", "_blank");
 
     try {
-      const respuestaNumero = await api.get("/cartas/numero");
+      const respuestanúmero = await api.get("/cartas/número");
 
-      const numeroReporte = respuestaNumero.data.numero;
+      const númeroReporte = respuestanúmero.data.número;
 
       await api.post("/cartas", {
         id_estudiante: item.id_estudiante,
         grupo_alerta: item.grupo_alerta,
         tipo: "llegada",
-        numero_reporte: numeroReporte,
+        número_reporte: númeroReporte,
         fecha_generacion: item.fecha
           ? String(item.fecha).substring(0, 10)
           : new Date().toISOString().split("T")[0],
         archivo_pdf: null,
-        observacion: "Notificado por WhatsApp",
+        Observación: "Notificado por WhatsApp",
       });
 
       if (ventanaWhatsApp) {
@@ -576,9 +573,9 @@ function Llegadas() {
                   <label className="form-label fw-bold">Motivo de llegada tarde</label>
                   <textarea
                     className="form-control"
-                    name="observacion"
+                    name="Observación"
                     placeholder="Escriba el motivo de la llegada tarde"
-                    value={formulario.observacion}
+                    value={formulario.Observación}
                     onChange={manejarCambio}
                   />
 
@@ -671,7 +668,7 @@ function Llegadas() {
           value={busqueda}
           onChange={(e) => {
             setBusqueda(e.target.value);
-            setPaginaActual(1);
+            setPáginaActual(1);
           }}
         />
       </div>
@@ -692,13 +689,13 @@ function Llegadas() {
             <th>Observación</th>
             <th>Total mes</th>
             <th>Alerta</th>
-            <th>Acciones</th>
+            <th>acciónes</th>
           </tr>
         </thead>
 
         <tbody>
 
-          {llegadasPagina.map((llegada) => (
+          {llegadasPágina.map((llegada) => (
             <tr key={llegada.id_llegada}>
 
               <td>{llegada.nombres}</td>
@@ -716,7 +713,7 @@ function Llegadas() {
               <td>{llegada.hora}</td>
 
               <td>
-                {llegada.observacion}
+                {llegada.Observación}
               </td>
 
               <td>
@@ -843,26 +840,26 @@ function Llegadas() {
         <div className="d-flex align-items-center gap-2">
           <button
             className="btn btn-outline-secondary"
-            disabled={paginaActual === 1}
+            disabled={PáginaActual === 1}
             onClick={() =>
-              setPaginaActual((pagina) => pagina - 1)
+              setPáginaActual((Página) => Página - 1)
             }
           >
             Anterior
           </button>
 
           <span className="fw-bold">
-            Página {paginaActual} de {totalPaginas || 1}
+            Página {PáginaActual} de {totalPáginas || 1}
           </span>
 
           <button
             className="btn btn-outline-primary"
             disabled={
-              paginaActual === totalPaginas ||
-              totalPaginas === 0
+              PáginaActual === totalPáginas ||
+              totalPáginas === 0
             }
             onClick={() =>
-              setPaginaActual((pagina) => pagina + 1)
+              setPáginaActual((Página) => Página + 1)
             }
           >
             Siguiente
@@ -1049,12 +1046,12 @@ function Llegadas() {
                 <textarea
                   className="form-control"
                   value={
-                    llegadaEditar.observacion || ""
+                    llegadaEditar.Observación || ""
                   }
                   onChange={(e) =>
                     setLlegadaEditar({
                       ...llegadaEditar,
-                      observacion:
+                      Observación:
                         e.target.value,
                     })
                   }
@@ -1141,7 +1138,7 @@ function Llegadas() {
                       <br />
 
                       Observación:{" "}
-                      {item.observacion}
+                      {item.Observación}
                     </div>
                   ))}
 

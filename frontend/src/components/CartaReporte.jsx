@@ -222,7 +222,7 @@ fecha,
       // 1. Generar PDF sin descargarlo
       const resultadoPDF = await generarPDF();
 
-      // 2. Abrir el PDF en una nueva pestaÃ±a
+      // 2. Abrir el PDF en una nueva pestaña
       const enlaceDescarga = document.createElement("a");
       enlaceDescarga.href = resultadoPDF.pdfUrl;
       enlaceDescarga.download = resultadoPDF.nombreArchivo;
@@ -352,7 +352,7 @@ fecha,
                 </h5>
 
                 <p>
-                  <strong>Reporte NÂ°:</strong> {numeroReporte}
+                  <strong>Reporte N°:</strong> {numeroReporte}
                 </p>
               </div>
 

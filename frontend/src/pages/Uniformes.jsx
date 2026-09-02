@@ -164,14 +164,11 @@ const cargarUniformes = async () => {
     }
 
     const mensaje =
-      `Cordial saludo, ${item.nombre_acudiente || "señor(a) acudiente"}. ` +
-      `Nos permitimos informarle que el estudiante ${item.nombres}, ` +
-      `del grado ${item.grado}, ha acumulado ${item.total_uniforme} ` +
-      `reportes relacionados con el uso inadecuado del uniforme. ` +
-      `Agradecemos su atención y acompañamiento en el cumplimiento ` +
-      `de las normas de presentación personal del Colegio San Pedro Claver.`;
-
-    const url =
+      `cordial saludo senor o senora ${item.nombre_acudiente || "acudiente"}, ` +
+      `nos permitimos informarle que el estudiante ${item.nombres}, ` +
+      `del grado, ${item.grado}, ha acumulado ${item.total_uniforme} reportes del uso inadecuado del uniforme, ` +
+      `agradecemos su atencion y cumplimiento de las normas de presentacion personal al colegio San Pedro Claver, ` +
+      `muchas gracias por su atencion.`;    const url =
       `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
 
     const ventanaWhatsApp = window.open("about:blank", "_blank");
