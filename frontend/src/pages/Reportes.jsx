@@ -350,7 +350,7 @@ function Reportes() {
         </div>
       )}
 
-      {cartasFiltradas.length > 10 && totalPaginas > 1 && (
+      {cartasFiltradas.length > 0 && (
         <div className="d-flex justify-content-center align-items-center gap-3 mt-3">
           <button
             className="btn btn-outline-primary"
@@ -397,6 +397,7 @@ function Reportes() {
 }
 
 export default Reportes;
+
 
 
 
