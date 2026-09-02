@@ -381,7 +381,7 @@ function Inasistencias() {
         numero_reporte: numeroReporte,
         fecha_generacion: new Date().toISOString().split("T")[0],
         archivo_pdf: null,
-        observacion: item.observacion || "Notificado por WhatsApp",
+        observacion: "Notificado por WhatsApp",
       });
 
       if (ventanaWhatsApp) {
@@ -1043,6 +1043,7 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
 
 
 
