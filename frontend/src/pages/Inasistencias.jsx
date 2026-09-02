@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 
 import api from "../services/api";
 
@@ -451,15 +451,6 @@ function Inasistencias() {
                       onClick={() => setReportesVer(item.id_estudiante)}
                     >
                       Ver reportes
-                    </button>
-
-                    <button
-                      className="btn btn-success btn-sm mt-3"
-                      onClick={() =>
-                        notificarAcudienteWhatsApp(item)
-                      }
-                    >
-                      Notificar acudiente por WhatsApp
                     </button>
                   </div>
                 </div>
@@ -1010,7 +1001,18 @@ function Inasistencias() {
                         return;
                       }
 
-                      setEstudianteCarta(estudiante);
+                      const datosEstudiante = estudiantes.find(
+                        (item) =>
+                          Number(item.id_estudiante) === Number(reportesVer),
+                      );
+
+                      setEstudianteCarta({
+                        ...estudiante,
+                        telefono_acudiente:
+                          datosEstudiante?.telefono_acudiente || "",
+                        nombre_acudiente:
+                          datosEstudiante?.nombre_acudiente || "",
+                      });
                       setReportesVer(null);
                       setMostrarCarta(true);
                     }}
@@ -1041,6 +1043,7 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
 
 
 

@@ -414,15 +414,6 @@ const cargarUniformes = async () => {
                       >
                         Ver reportes
                       </button>
-
-                      <button
-                        className="btn btn-success btn-sm mt-3"
-                        onClick={() =>
-                          notificarAcudienteWhatsApp(item)
-                        }
-                      >
-                        Notificar acudiente por WhatsApp
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -988,11 +979,39 @@ const cargarUniformes = async () => {
                   <button
                     className="btn btn-naranja mt-3"
                     onClick={() => {
-                      setEstudianteCarta(item);
+                      const estudiante = uniformes.find(
+                        (item) =>
+                          Number(item.id_estudiante) === Number(reportesVer),
+                      );
+
+                      if (!estudiante) {
+                        Swal.fire(
+                          "Error",
+                          "No se encontro el estudiante",
+                          "error",
+                        );
+
+                        return;
+                      }
+
+                      const datosEstudiante = estudiantes.find(
+                        (item) =>
+                          Number(item.id_estudiante) === Number(reportesVer),
+                      );
+
+                      setEstudianteCarta({
+                        ...estudiante,
+                        telefono_acudiente:
+                          datosEstudiante?.telefono_acudiente || "",
+                        nombre_acudiente:
+                          datosEstudiante?.nombre_acudiente || "",
+                      });
+
+                      setReportesVer(null);
                       setMostrarCarta(true);
                     }}
                   >
-                    📄 Generar carta
+                    ðŸ“„ Generar carta
                   </button>
                 </div>
               </div>
@@ -1019,6 +1038,7 @@ const cargarUniformes = async () => {
 }
 
 export default Uniformes;
+
 
 
 

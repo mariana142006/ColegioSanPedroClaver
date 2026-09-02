@@ -650,15 +650,6 @@ function Llegadas() {
               >
                 Ver reportes
               </button>
-
-              <button
-                className="btn btn-success btn-sm mt-2"
-                onClick={() =>
-                  notificarAcudienteWhatsApp(item)
-                }
-              >
-                Notificar acudiente por WhatsApp
-              </button>
             </div>
           ))}
 
@@ -1207,6 +1198,7 @@ function Llegadas() {
 }
 
 export default Llegadas;
+
 
 
 

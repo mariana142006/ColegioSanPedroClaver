@@ -1,6 +1,7 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import Swal from "sweetalert2";
 
 import logoColegio from "../assets/logo-colegio.png";
 import logoInasistencia from "../assets/logo-inasistencia.jpg";
@@ -221,7 +222,7 @@ fecha,
       // 1. Generar PDF sin descargarlo
       const resultadoPDF = await generarPDF();
 
-      // 2. Abrir el PDF en una nueva pestaña
+      // 2. Abrir el PDF en una nueva pestaÃ±a
       const enlaceDescarga = document.createElement("a");
       enlaceDescarga.href = resultadoPDF.pdfUrl;
       enlaceDescarga.download = resultadoPDF.nombreArchivo;
@@ -270,9 +271,7 @@ fecha,
         window.open(url, "_blank");
       }
 
-      alert(
-        "Carta generada correctamente. Se abrio el PDF y WhatsApp para realizar la notificacion."
-      );
+      await Swal.fire({ title: "¡Listo!", text: "Se descargó el PDF y se notificó al acudiente correctamente.", icon: "success", confirmButtonText: "OK" });
 
       onCerrar();
 
@@ -353,7 +352,7 @@ fecha,
                 </h5>
 
                 <p>
-                  <strong>Reporte N°:</strong> {numeroReporte}
+                  <strong>Reporte NÂ°:</strong> {numeroReporte}
                 </p>
               </div>
 
