@@ -358,11 +358,10 @@ function Inasistencias() {
     }
 
     const mensaje =
-      `cordial saludo padre de familia ${item.nombre_acudiente || "acudiente"}, ` +
-      `nos permitimos informarle que el estudiante ${item.nombres}, ` +
-      `del grado, ${item.grado}, ha acumulado ${item.total_inasistencias} inasistencias, ` +
-      `agradecemos su atencion y cumplimiento de asistencia al colegio San Pedro Claver, ` +
-      `muchas gracias por su atencion.`;    const url =
+      `Cordial saludo padre de familia, ${item.nombre_acudiente || "acudiente"}.\n\n` +
+      `Nos permitimos informarle que el estudiante ${item.nombres}, del grado ${item.grado}, ha acumulado ${item.total_inasistencias} inasistencias.\n\n` +
+      `Agradecemos su atencion y cumplimiento de asistencia al Colegio San Pedro Claver.\n\n` +
+      `Muchas gracias por su atencion.`;    const url =
       `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
 
     const ventanaWhatsApp = window.open("about:blank", "_blank");

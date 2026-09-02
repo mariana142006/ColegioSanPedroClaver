@@ -258,12 +258,10 @@ fecha,
         }
 
         const mensaje =
-          `Cordial saludo, ${estudiante.nombre_acudiente || "senor(a) acudiente"}. ` +
-          `Nos permitimos informarle que el estudiante ${estudiante.nombres}, ` +
-          `del grado ${estudiante.grado}, tiene un reporte registrado en el sistema ` +
-          `institucional. Adjuntamos la carta correspondiente para su conocimiento ` +
-          `y seguimiento. ` +
-          `Agradecemos su atencion y acompanamiento al estudiante.`;
+          `Cordial saludo padre de familia, ${estudiante.nombre_acudiente || "acudiente"}.\n\n` +
+          `Nos permitimos informarle que el estudiante ${estudiante.nombres}, del grado ${estudiante.grado}, ha acumulado ${estudiante.total_llegadas} llegadas tarde.\n\n` +
+          `Agradecemos su atencion y cumplimiento del ingreso al Colegio San Pedro Claver a las 6:20 a. m.\n\n` +
+          `Muchas gracias por su atencion.`;
 
         const url =
           `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
@@ -271,7 +269,7 @@ fecha,
         window.open(url, "_blank");
       }
 
-      await Swal.fire({ title: "¡Listo!", text: "Se descargó el PDF y se notificó al acudiente correctamente.", icon: "success", confirmButtonText: "OK" });
+      await Swal.fire({ title: "Listo", text: "Se descargo el PDF y se notifico al acudiente correctamente.", icon: "success", confirmButtonText: "OK" });
 
       onCerrar();
 
