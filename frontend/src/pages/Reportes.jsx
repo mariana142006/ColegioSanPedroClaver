@@ -13,7 +13,7 @@ function Reportes() {
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
   const [paginaActual, setPaginaActual] = useState(1);
-  const reportesPorPagina = 3;
+  const reportesPorPagina = 10;
 
   const cargarCartas = async () => {
     try {
@@ -35,10 +35,10 @@ function Reportes() {
   const eliminarCarta = async (id) => {
     const resultado = await Swal.fire({
       title: "¿Eliminar reporte?",
-      text: "Este registro se eliminará de la base de datos.",
+      text: "Este registro se eliminara de la base de datos.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
+      confirmButtonText: "Si, eliminar",
       cancelButtonText: "Cancelar",
       confirmButtonColor: "#dc2626",
     });
@@ -117,7 +117,7 @@ function Reportes() {
     pdf.setFontSize(10);
     pdf.setTextColor(0, 0, 0);
 
-    pdf.text(`Fecha de generación: ${fecha}`, 105, 36, {
+    pdf.text(`Fecha de generacion: ${fecha}`, 105, 36, {
       align: "center",
     });
 
@@ -184,7 +184,7 @@ function Reportes() {
       align: "center",
     });
 
-    pdf.text("Firma Coordinación Académica", 105, altoPagina - 28, {
+    pdf.text("Firma Coordinacion Academica", 105, altoPagina - 28, {
       align: "center",
     });
 
@@ -244,8 +244,8 @@ function Reportes() {
       ) : cartasFiltradas.length === 0 ? (
         <div className="alert alert-secondary">
           {busqueda
-            ? "No se encontraron reportes para esa búsqueda."
-            : "No hay reportes generados todavía."}
+            ? "No se encontraron reportes para esa busqueda."
+            : "No hay reportes generados todavia."}
         </div>
       ) : (
         <div className="table-responsive">
@@ -320,7 +320,7 @@ function Reportes() {
                       </span>
                     ) : (
                       <span className="text-muted">
-                        Sin observación
+                        Sin observacion
                       </span>
                     )}
                   </td>
@@ -397,6 +397,8 @@ function Reportes() {
 }
 
 export default Reportes;
+
+
 
 
 
