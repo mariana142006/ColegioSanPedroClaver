@@ -425,9 +425,9 @@ fecha,
               }}
             >
               <div className="col">
-                {configuracion?.coordinador || "Coordinador Academico"}
+                Atentamente
                 <br />
-                Firma Coordinacion
+                {configuracion?.coordinador || "Coordinador Academico"}
               </div>
 
               <div className="col">
