@@ -148,11 +148,12 @@ function Inasistencias() {
         );
       }
 
-      alert(
-        editar
-          ? "Inasistencia actualizada correctamente"
-          : "Inasistencia registrada correctamente"
-      );
+      Swal.fire({
+        title: editar ? "Actualizado" : "Registrado",
+        text: editar ? "La inasistencia se actualizó correctamente." : "La inasistencia se registró correctamente.",
+        icon: "success",
+        confirmButtonText: "OK"
+      });
 
       setMostrarFormulario(false);
       setEditar(false);
@@ -596,6 +597,18 @@ function Inasistencias() {
                     const finGrupo =
                       inicioGrupo + 2;
 
+                    
+                    const gruposProcesados =
+                      Number(item.total_cartas_inasistencia || 0) +
+                      Number(item.notificado_whatsapp || 0);
+
+                    if (gruposProcesados > grupo) {
+                      return (
+                        <span className="badge bg-success">
+                          Generado
+                        </span>
+                      );
+                    }
                     /*
                      * Si el grupo de este registro ya
                      * tiene sus tres registros, los tres
@@ -1030,6 +1043,10 @@ function Inasistencias() {
 }
 
 export default Inasistencias;
+
+
+
+
 
 
 
