@@ -390,6 +390,7 @@ function Reportes() {
           total={0}
           onCerrar={() => setCartaVer(null)}
           onGenerarPDF={() => {}}
+          mostrarBotonWhatsApp={false}
         />
       )}
     </div>

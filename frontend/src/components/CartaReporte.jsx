@@ -9,7 +9,7 @@ import logoLlegadas from "../assets/logo-llegadas.png";
 
 import api from "../services/api";
 
-function CartaReporte({ tipo, estudiante, total, fechaLlegada, grupoAlerta, onCerrar, onGenerarPDF }) {
+function CartaReporte({ tipo, estudiante, total, fechaLlegada, grupoAlerta, onCerrar, onGenerarPDF, mostrarBotonWhatsApp = true }) {
   const [configuracion, setConfiguracion] = useState(null);
   const [numeroReporte, setNumeroReporte] = useState("");
   const [generando, setGenerando] = useState(false);
@@ -222,7 +222,12 @@ fecha,
       const resultadoPDF = await generarPDF();
 
       // 2. Abrir el PDF en una nueva pestaña
-      const ventanaPDF = window.open(resultadoPDF.pdfUrl, "_blank");
+      const enlaceDescarga = document.createElement("a");
+      enlaceDescarga.href = resultadoPDF.pdfUrl;
+      enlaceDescarga.download = resultadoPDF.nombreArchivo;
+      document.body.appendChild(enlaceDescarga);
+      enlaceDescarga.click();
+      document.body.removeChild(enlaceDescarga);
 
       // 3. Guardar carta en BD
       const cartaGuardada = await guardarCarta(resultadoPDF.nombreArchivo);
@@ -447,14 +452,15 @@ fecha,
               Cerrar
             </button>
 
-            <button
-              className="btn btn-success"
-              onClick={manejarGenerarCarta}
-              disabled={generando || !numeroReporte}
-            >
-              {generando ? "Generando..." : "Notificar acudiente por WhatsApp"}
-            </button>
-          </div>
+            {mostrarBotonWhatsApp && (
+              <button
+                className="btn btn-success"
+                onClick={manejarGenerarCarta}
+                disabled={generando || !numeroReporte}
+              >
+                {generando ? "Generando..." : "Notificar acudiente por WhatsApp"}
+              </button>
+            )}          </div>
         </div>
       </div>
     </div>
