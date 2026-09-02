@@ -121,7 +121,7 @@ function CartaReporte({ tipo, estudiante, total, fechaLlegada, grupoAlerta, onCe
 
         archivo_pdf: archivo,
 
-        observacion: `Reporte generado por ${tipo}`,
+        observacion: "Carta generada",
       });
 
       console.log("Carta guardada:", respuesta.data);
@@ -427,6 +427,7 @@ fecha,
 }
 
 export default CartaReporte;
+
 
 
 
