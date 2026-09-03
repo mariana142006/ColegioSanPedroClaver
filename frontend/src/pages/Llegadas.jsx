@@ -1182,7 +1182,7 @@ function Llegadas() {
         <CartaReporte
           tipo="llegada"
           estudiante={estudianteCarta}
-          total={estudianteCarta?.total_mes}
+          total={estudianteCarta?.total_llegadas}
           grupoAlerta={estudianteCarta?.grupo_alerta}
           fechaLlegada={fechaCarta}
           onCerrar={() => { setMostrarCarta(false); cargarLlegadas(); }}
