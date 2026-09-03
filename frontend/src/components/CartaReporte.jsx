@@ -268,7 +268,7 @@ fecha,
         } else if (tipo === "llegada") {
           mensaje =
             `Cordial saludo padre de familia, ${estudiante.nombre_acudiente || "acudiente"}.\n\n` +
-            `Nos permitimos informarle que el estudiante ${estudiante.nombres}, del grado ${estudiante.grado}, ha acumulado ${estudiante.total_llegadas} llegadas tarde.\n\n` +
+            `Nos permitimos informarle que el estudiante ${estudiante.nombres}, del grado ${estudiante.grado}, ha acumulado ${Number(total) || 0} llegadas tarde.\n\n` +
             `Agradecemos su atencion y cumplimiento del ingreso al Colegio San Pedro Claver a las 6:20 a. m.\n\n` +
             `Muchas gracias por su atencion.`;
         } else if (tipo === "inasistencia") {
