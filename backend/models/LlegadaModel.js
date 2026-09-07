@@ -29,6 +29,8 @@ const obtenerLlegadas = async () => {
           AND c.tipo = 'llegada'
           AND c.observacion NOT LIKE 'Notificado por WhatsApp%'
           AND c.grupo_alerta = l.grupo_alerta
+          AND MONTH(c.fecha_generacion) = MONTH(l.fecha)
+          AND YEAR(c.fecha_generacion) = YEAR(l.fecha)
       ) AS carta_generada,
 
       (
@@ -38,6 +40,8 @@ const obtenerLlegadas = async () => {
           AND c.tipo = 'llegada'
           AND c.observacion LIKE 'Notificado por WhatsApp%'
           AND c.grupo_alerta = l.grupo_alerta
+          AND MONTH(c.fecha_generacion) = MONTH(l.fecha)
+          AND YEAR(c.fecha_generacion) = YEAR(l.fecha)
       ) AS notificado_whatsapp,
 
       (
@@ -46,6 +50,8 @@ const obtenerLlegadas = async () => {
         WHERE c.id_estudiante = l.id_estudiante
           AND c.tipo = 'llegada'
           AND c.grupo_alerta = l.grupo_alerta
+          AND MONTH(c.fecha_generacion) = MONTH(l.fecha)
+          AND YEAR(c.fecha_generacion) = YEAR(l.fecha)
         ORDER BY c.id_carta DESC
         LIMIT 1
       ) AS ultima_observacion_carta
@@ -69,7 +75,7 @@ const crearLlegada = async (datos) => {
   const {
     id_estudiante,
     fecha,
-    observacion,
+    observacion: observacion,
   } = datos;
 
   // ==========================================
@@ -133,7 +139,7 @@ const crearLlegada = async (datos) => {
   // ==========================================
   if (segundosHoraActual <= segundosHoraEntrada) {
     throw new Error(
-      `No se puede registrar una llegada tarde todavía. ` +
+      `No se puede registrar una llegada tarde todavÃ­a. ` +
       `La hora de entrada es ${horaEntradaTexto} y la hora actual es ${hora}.`
     );
   }
@@ -224,7 +230,7 @@ const actualizarLlegada = async (id, datos) => {
   const {
     id_estudiante,
     fecha,
-    observacion,
+    observacion: observacion,
   } = datos;
 
   const [anterior] = await conexion.query(
@@ -406,4 +412,7 @@ module.exports = {
   actualizarTotalesMes,
   marcarAlertaRevisada,
 };
+
+
+
 

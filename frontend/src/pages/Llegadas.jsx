@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import api from "../services/api";
 import "../styles/usuarios.css";
 import Swal from "sweetalert2";
@@ -21,13 +21,13 @@ function Llegadas() {
   const [busqueda, setBusqueda] = useState("");
 
 
-  const [PáginaActual, setPáginaActual] = useState(1);
+  const [PaginaActual, setPaginaActual] = useState(1);
 
-  const llegadasPorPágina = 10;
+  const llegadasPorPagina = 10;
   const [formulario, setFormulario] = useState({
     id_estudiante: "",
     fecha: "",
-    Observación: "",
+    observacion: "",
   });
 
   // ==========================================
@@ -79,17 +79,17 @@ function Llegadas() {
     );
   });
 
-  const totalPáginas = Math.ceil(
-    llegadas.length / llegadasPorPágina,
+  const totalPaginas = Math.ceil(
+    llegadas.length / llegadasPorPagina,
   );
 
   const indiceInicial =
-    (PáginaActual - 1) * llegadasPorPágina;
+    (PaginaActual - 1) * llegadasPorPagina;
 
   const indiceFinal =
-    indiceInicial + llegadasPorPágina;
+    indiceInicial + llegadasPorPagina;
 
-  const llegadasPágina = llegadasFiltradas.slice(
+  const llegadasPagina = llegadasFiltradas.slice(
     indiceInicial,
     indiceFinal,
   );
@@ -120,12 +120,12 @@ function Llegadas() {
     e.preventDefault();
 
     if (!formulario.id_estudiante) {
-      Swal.fire("Atención", "Seleccione un estudiante", "warning");
+      Swal.fire("Atencion", "Seleccione un estudiante", "warning");
       return;
     }
 
     if (!formulario.fecha) {
-      Swal.fire("Atención", "Seleccione la fecha", "warning");
+      Swal.fire("Atencion", "Seleccione la fecha", "warning");
       return;
     }
 
@@ -142,7 +142,7 @@ function Llegadas() {
       setFormulario({
         id_estudiante: "",
         fecha: "",
-        Observación: "",
+        observacion: "",
       });
 
       setBusquedaEstudiante("");
@@ -200,10 +200,10 @@ function Llegadas() {
   const eliminarLlegada = async (id) => {
     const resultado = await Swal.fire({
       title: "Eliminar registro?",
-      text: "Esta acción no se puede deshacer",
+      text: "Esta accion no se puede deshacer",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
+      confirmButtonText: "Si, eliminar",
       cancelButtonText: "Cancelar",
     });
 
@@ -294,7 +294,7 @@ function Llegadas() {
         Number(item.notificado_whatsapp || 0) > 0;
 
       // Carta y WhatsApp atienden la misma alerta.
-      // Si ningúna de las dos acciónes se ha realizado,
+      // Si ninguna de las dos acciones se ha realizado,
       // la alerta debe aparecer.
       return !cartaGenerada && !whatsappNotificado;
     });
@@ -303,19 +303,19 @@ function Llegadas() {
   // NOTIFICAR ACUDIENTE POR WHATSAPP
   // ============================================================
   const notificarAcudienteWhatsApp = async (item) => {
-    if (!item.teléfono_acudiente) {
+    if (!item.telefono_acudiente) {
       Swal.fire(
-        "Sin teléfono",
-        "Este estudiante no tiene registrado un número de acudiente.",
+        "Sin telefono",
+        "Este estudiante no tiene registrado un numero de acudiente.",
         "warning"
       );
       return;
     }
 
-    let teléfono = String(item.teléfono_acudiente).replace(/\D/g, "");
+    let telefono = String(item.telefono_acudiente).replace(/\D/g, "");
 
-    if (teléfono.length === 10 && teléfono.startsWith("3")) {
-      teléfono = "57" + teléfono;
+    if (telefono.length === 10 && telefono.startsWith("3")) {
+      telefono = "57" + telefono;
     }
 
     const mensaje =
@@ -324,25 +324,25 @@ function Llegadas() {
       `del grado, ${item.grado}, ha acumulado ${item.total_llegadas} llegadas tarde, ` +
       `agradecemos su atencion y cumplimiento del ingreso al colegio San Pedro Claver a las 6:20 am, ` +
       `muchas gracias por su atencion.`;    const url =
-      `https://wa.me/${teléfono}?text=${encodeURIComponent(mensaje)}`;
+      `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
 
     const ventanaWhatsApp = window.open("about:blank", "_blank");
 
     try {
-      const respuestanúmero = await api.get("/cartas/número");
+      const respuestaNumero = await api.get("/cartas/numero");
 
-      const númeroReporte = respuestanúmero.data.número;
+      const numeroReporte = respuestaNumero.data["numero"];
 
       await api.post("/cartas", {
         id_estudiante: item.id_estudiante,
         grupo_alerta: item.grupo_alerta,
         tipo: "llegada",
-        número_reporte: númeroReporte,
+        numero_reporte: numeroReporte,
         fecha_generacion: item.fecha
           ? String(item.fecha).substring(0, 10)
           : new Date().toISOString().split("T")[0],
         archivo_pdf: null,
-        Observación: "Notificado por WhatsApp",
+        observacion: "Notificado por WhatsApp",
       });
 
       if (ventanaWhatsApp) {
@@ -354,8 +354,8 @@ function Llegadas() {
       await cargarLlegadas();
 
       Swal.fire({
-        title: "Notificación realizada",
-        text: "Se notificó al acudiente por WhatsApp y la alerta fue registrada.",
+        title: "Notificacion realizada",
+        text: "Se notifico al acudiente por WhatsApp y la alerta fue registrada.",
         icon: "success",
         timer: 1800,
         showConfirmButton: false,
@@ -363,7 +363,7 @@ function Llegadas() {
 
     } catch (error) {
       console.error(
-        "Error registrando notificación por WhatsApp:",
+        "Error registrando notificacion por WhatsApp:",
         error
       );
 
@@ -373,7 +373,7 @@ function Llegadas() {
 
       Swal.fire(
         "Error",
-        "No se pudo registrar la notificación en el sistema.",
+        "No se pudo registrar la notificacion en el sistema.",
         "error"
       );
     }
@@ -533,7 +533,7 @@ function Llegadas() {
                         );
                       }).length === 0 && (
                         <div className="text-center text-muted p-3">
-                          No se encontró ningún estudiante.
+                          No se encontro ningun estudiante.
                         </div>
                       )}
                     </div>
@@ -573,9 +573,9 @@ function Llegadas() {
                   <label className="form-label fw-bold">Motivo de llegada tarde</label>
                   <textarea
                     className="form-control"
-                    name="Observación"
+                    name="observacion"
                     placeholder="Escriba el motivo de la llegada tarde"
-                    value={formulario.Observación}
+                    value={formulario.observacion}
                     onChange={manejarCambio}
                   />
 
@@ -668,7 +668,7 @@ function Llegadas() {
           value={busqueda}
           onChange={(e) => {
             setBusqueda(e.target.value);
-            setPáginaActual(1);
+            setPaginaActual(1);
           }}
         />
       </div>
@@ -686,16 +686,16 @@ function Llegadas() {
             <th>Grado</th>
             <th>Fecha</th>
             <th>Hora</th>
-            <th>Observación</th>
+            <th>observacion</th>
             <th>Total mes</th>
             <th>Alerta</th>
-            <th>acciónes</th>
+            <th>acciones</th>
           </tr>
         </thead>
 
         <tbody>
 
-          {llegadasPágina.map((llegada) => (
+          {llegadasPagina.map((llegada) => (
             <tr key={llegada.id_llegada}>
 
               <td>{llegada.nombres}</td>
@@ -713,7 +713,7 @@ function Llegadas() {
               <td>{llegada.hora}</td>
 
               <td>
-                {llegada.Observación}
+                {llegada.observacion}
               </td>
 
               <td>
@@ -735,10 +735,23 @@ function Llegadas() {
                   const grupo = Number(llegada.grupo_alerta || 0);
 
                   const registrosGrupo = llegadas.filter(
-                    (registro) =>
-                      Number(registro.id_estudiante) ===
-                        Number(llegada.id_estudiante) &&
-                      Number(registro.grupo_alerta || 0) === grupo
+                    (registro) => {
+                      if (
+                        Number(registro.id_estudiante) !==
+                          Number(llegada.id_estudiante) ||
+                        Number(registro.grupo_alerta || 0) !== grupo
+                      ) {
+                        return false;
+                      }
+
+                      const fechaRegistro = new Date(registro.fecha);
+                      const fechaLlegada = new Date(llegada.fecha);
+
+                      return (
+                        fechaRegistro.getMonth() === fechaLlegada.getMonth() &&
+                        fechaRegistro.getFullYear() === fechaLlegada.getFullYear()
+                      );
+                    }
                   ).length;
 
                   const cartaGenerada =
@@ -840,26 +853,26 @@ function Llegadas() {
         <div className="d-flex align-items-center gap-2">
           <button
             className="btn btn-outline-secondary"
-            disabled={PáginaActual === 1}
+            disabled={PaginaActual === 1}
             onClick={() =>
-              setPáginaActual((Página) => Página - 1)
+              setPaginaActual((Pagina) => Pagina - 1)
             }
           >
             Anterior
           </button>
 
           <span className="fw-bold">
-            Página {PáginaActual} de {totalPáginas || 1}
+            Pagina {PaginaActual} de {totalPaginas || 1}
           </span>
 
           <button
             className="btn btn-outline-primary"
             disabled={
-              PáginaActual === totalPáginas ||
-              totalPáginas === 0
+              PaginaActual === totalPaginas ||
+              totalPaginas === 0
             }
             onClick={() =>
-              setPáginaActual((Página) => Página + 1)
+              setPaginaActual((Pagina) => Pagina + 1)
             }
           >
             Siguiente
@@ -1001,7 +1014,7 @@ function Llegadas() {
                         );
                       }).length === 0 && (
                         <div className="text-center text-muted p-3">
-                          No se encontró ningún estudiante.
+                          No se encontro ningun estudiante.
                         </div>
                       )}
                     </div>
@@ -1046,12 +1059,12 @@ function Llegadas() {
                 <textarea
                   className="form-control"
                   value={
-                    llegadaEditar.Observación || ""
+                    llegadaEditar.observacion || ""
                   }
                   onChange={(e) =>
                     setLlegadaEditar({
                       ...llegadaEditar,
-                      Observación:
+                      observacion:
                         e.target.value,
                     })
                   }
@@ -1137,8 +1150,8 @@ function Llegadas() {
 
                       <br />
 
-                      Observación:{" "}
-                      {item.Observación}
+                      observacion:{" "}
+                      {item.observacion}
                     </div>
                   ))}
 
@@ -1149,9 +1162,10 @@ function Llegadas() {
                     onClick={() => {
                       const estudiante = llegadas.find((item) => Number(item.id_estudiante) === Number(reportesVer) && Number(item.grupo_alerta || 0) === Math.max(...llegadas.filter((r) => Number(r.id_estudiante) === Number(reportesVer)).map((r) => Number(r.grupo_alerta || 0))));
 
-                      setEstudianteCarta(
-                        estudiante
-                      );
+                      setEstudianteCarta({
+                        ...estudiante,
+                        total_llegadas: Number(estudiante?.total_mes || 0),
+                      });
 
                       setFechaCarta(
                         estudiante?.fecha
@@ -1195,36 +1209,6 @@ function Llegadas() {
 }
 
 export default Llegadas;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
